@@ -3,7 +3,7 @@ import Card from 'primevue/card';
 import InputGroup from 'primevue/inputgroup';
 import InputGroupAddon from 'primevue/inputgroupaddon';
 import UserIcon from '@primeicons/vue/user';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import InputText from 'primevue/inputtext';
 import FloatLabel from 'primevue/floatlabel';
 import Lock from '@primeicons/vue/lock';
@@ -21,23 +21,52 @@ const password = ref<string>('');
 const passwordMask = ref(true);
 const passwordRepeated = ref<string>('');
 const passwordRepeatedMask = ref(true);
+const passwordRepeatedError = ref<string>('');
 
 const userStore = useUserStore();
 
-function login() {
+async function login() {
     const userBody = { usuario: username.value, password: password.value };
 
     try {
-        const user = userStore.loginUser(userBody);
+        const user = await userStore.loginUser(userBody);
         console.log(user);
     } catch (error: unknown) {
         console.error(error);
     }
 }
 
-function signup() {
+async function signup() {
+    const userBody = { usuario: username.value, password: password.value };
 
+    try {
+        const user = await userStore.signUpUser(userBody)
+        console.log(user);
+    } catch (error: unknown) {
+        console.error(error);
+    }
 }
+
+function validateSamePassword() {
+    if (passwordRepeated.value && password.value !== passwordRepeated.value) {
+        passwordRepeatedError.value = 'Las Contraseñas Deben Ser Iguales';
+    } else {
+        passwordRepeatedError.value = '';
+    }
+}
+
+function disableButton(): boolean {
+    const hasEmptyRequiredField = !username.value || !password.value;
+
+    if (isLogin.value) {
+        return hasEmptyRequiredField;
+    }
+
+    return hasEmptyRequiredField || !passwordRepeated.value || passwordRepeatedError.value !== '';
+}
+
+watch([password, passwordRepeated], validateSamePassword);
+
 </script>
 
 <template>
@@ -109,14 +138,14 @@ function signup() {
                                     <label for="password">Contraseña</label>
                                 </FloatLabel>
                             </InputGroup>
-                            <InputGroup>
+                            <InputGroup class="password-repeat-group">
                                 <InputGroupAddon>
                                     <Lock :size="24" />
                                 </InputGroupAddon>
                                 <FloatLabel>
                                     <IconField>
-                                        <InputPassword v-model="passwordRepeated" class="password-input"
-                                            :mask="passwordRepeatedMask" />
+                                        <InputPassword v-model="passwordRepeated" class="password-repeat-input"
+                                            :mask="passwordRepeatedMask" :invalid="passwordRepeatedError !== ''" />
                                         <InputIcon class="cursor-pointer"
                                             @click="passwordRepeatedMask = !passwordRepeatedMask">
                                             <Eye :size="16" v-if="passwordRepeatedMask" />
@@ -125,6 +154,7 @@ function signup() {
                                     </IconField>
                                     <label for="password">Repetir Contraseña</label>
                                 </FloatLabel>
+                                <span class="password-error">{{ passwordRepeatedError }}</span>
                             </InputGroup>
                         </div>
                     </Transition>
@@ -136,7 +166,7 @@ function signup() {
                     <p v-on:click="isLogin = !isLogin">{{ isLogin ? 'Crear Cuenta' : 'Iniciar Sesión' }}</p>
                 </div>
                 <div class="login-button">
-                    <Button v-on:click="isLogin ? login() : signup()">
+                    <Button v-on:click="isLogin ? login() : signup()" :disabled="disableButton()">
                         {{ isLogin ? 'Iniciar Sesión' : 'Crear Cuenta' }}
                     </Button>
                 </div>
@@ -202,9 +232,21 @@ function signup() {
 }
 
 .user-input.p-inputtext,
-.password-input.p-inputtext {
+.password-input.p-inputtext,
+.password-repeat-input.p-inputtext {
     height: 40px;
     font-size: 16px;
+}
+
+.password-repeat-group {
+    position: relative;
+}
+
+.password-error {
+    position: absolute;
+    top: 100%;
+    font-size: 14px;
+    color: light-dark(#f87171, #fca5a5);
 }
 
 .link-options {

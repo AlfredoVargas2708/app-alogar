@@ -34,9 +34,20 @@ export const useUserStore = defineStore('users', () => {
     error.value = null
     try {
       const response = await api.post<User>('/login', user)
-      userData.value = response.data
+      return response.data
     } catch (err: unknown) {
       error.value = getErrorMessage(err, 'Error al iniciar sesión')
+    }
+  }
+
+  async function signUpUser(user: UserRequest) {
+    isLoading.value = true
+    error.value = null
+    try {
+      const response = await api.post<User>('/signup', user)
+      return response.data
+    } catch (err: unknown) {
+      error.value = getErrorMessage(err, 'Error al crear cuenta')
     }
   }
 
@@ -45,5 +56,6 @@ export const useUserStore = defineStore('users', () => {
     isLoading,
     error,
     loginUser,
+    signUpUser,
   }
 })
