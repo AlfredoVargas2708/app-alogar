@@ -1,0 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap');
+
+span,
+label,
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.p-button {
+  font-family: 'Figtree', sans-serif !important;
+}
