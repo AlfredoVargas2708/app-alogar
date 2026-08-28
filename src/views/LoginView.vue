@@ -8,11 +8,36 @@ import InputText from 'primevue/inputtext';
 import FloatLabel from 'primevue/floatlabel';
 import Lock from '@primeicons/vue/lock';
 import Button from 'primevue/button';
+import { useUserStore } from '@/stores/userStore';
+import InputPassword from 'primevue/inputpassword';
+import IconField from 'primevue/iconfield';
+import InputIcon from 'primevue/inputicon';
+import Eye from '@primeicons/vue/eye';
+import EyeSlash from '@primeicons/vue/eye-slash';
 
 const isLogin = ref<boolean>(true);
 const username = ref<string>('');
 const password = ref<string>('');
+const passwordMask = ref(true);
 const passwordRepeated = ref<string>('');
+const passwordRepeatedMask = ref(true);
+
+const userStore = useUserStore();
+
+function login() {
+    const userBody = { usuario: username.value, password: password.value };
+
+    try {
+        const user = userStore.loginUser(userBody);
+        console.log(user);
+    } catch (error: unknown) {
+        console.error(error);
+    }
+}
+
+function signup() {
+
+}
 </script>
 
 <template>
@@ -48,7 +73,13 @@ const passwordRepeated = ref<string>('');
                                     <Lock :size="24" />
                                 </InputGroupAddon>
                                 <FloatLabel>
-                                    <InputText v-model="password" class="password-input" />
+                                    <IconField>
+                                        <InputPassword v-model="password" :mask="passwordMask" />
+                                        <InputIcon class="cursor-pointer" @click="passwordMask = !passwordMask">
+                                            <Eye :size="16" v-if="passwordMask" />
+                                            <EyeSlash :size="16" v-else />
+                                        </InputIcon>
+                                    </IconField>
                                     <label for="password">Contraseña</label>
                                 </FloatLabel>
                             </InputGroup>
@@ -68,7 +99,13 @@ const passwordRepeated = ref<string>('');
                                     <Lock :size="24" />
                                 </InputGroupAddon>
                                 <FloatLabel>
-                                    <InputText v-model="password" class="password-input" />
+                                    <IconField>
+                                        <InputPassword v-model="password" class="password-input" :mask="passwordMask" />
+                                        <InputIcon class="cursor-pointer" @click="passwordMask = !passwordMask">
+                                            <Eye :size="16" v-if="passwordMask" />
+                                            <EyeSlash :size="16" v-else />
+                                        </InputIcon>
+                                    </IconField>
                                     <label for="password">Contraseña</label>
                                 </FloatLabel>
                             </InputGroup>
@@ -77,7 +114,15 @@ const passwordRepeated = ref<string>('');
                                     <Lock :size="24" />
                                 </InputGroupAddon>
                                 <FloatLabel>
-                                    <InputText v-model="passwordRepeated" class="password-input" />
+                                    <IconField>
+                                        <InputPassword v-model="passwordRepeated" class="password-input"
+                                            :mask="passwordRepeatedMask" />
+                                        <InputIcon class="cursor-pointer"
+                                            @click="passwordRepeatedMask = !passwordRepeatedMask">
+                                            <Eye :size="16" v-if="passwordRepeatedMask" />
+                                            <EyeSlash :size="16" v-else />
+                                        </InputIcon>
+                                    </IconField>
                                     <label for="password">Repetir Contraseña</label>
                                 </FloatLabel>
                             </InputGroup>
@@ -91,7 +136,7 @@ const passwordRepeated = ref<string>('');
                     <p v-on:click="isLogin = !isLogin">{{ isLogin ? 'Crear Cuenta' : 'Iniciar Sesión' }}</p>
                 </div>
                 <div class="login-button">
-                    <Button>
+                    <Button v-on:click="isLogin ? login() : signup()">
                         {{ isLogin ? 'Iniciar Sesión' : 'Crear Cuenta' }}
                     </Button>
                 </div>
