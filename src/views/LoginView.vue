@@ -17,16 +17,18 @@ const passwordRepeated = ref<string>('');
 
 <template>
     <div class="login-container">
-        <Card class="max-w-sm w-full" :class="isLogin ? 'front' : 'back'">
+        <Card class="login-card max-w-sm w-full h-full" :class="isLogin ? 'front' : 'back'">
             <template #title>
                 <div class="title-container">
-                    <img src="https://alogar.cl/cdn/shop/files/Logo-2025_da742222-4572-4aa9-8ccb-f15ed9de1f2f.png?v=1772139348&width=330"
-                        alt="">
+                    <img src="/public/logo-alogar.avif" alt="">
                     <Transition name="title-switch" mode="out-in">
-                        <h2 v-if="isLogin" key="login-title" class="text-center mt-1">Iniciar Sesión</h2>
-                        <h2 v-else key="signup-title" class="text-center mt-1">Crear Cuenta</h2>
+                        <h1 v-if="isLogin" key="login-title" class="text-center mt-1 font-italic">Iniciar Sesión</h1>
+                        <h1 v-else key="signup-title" class="text-center mt-1 font-italic">Crear Cuenta</h1>
                     </Transition>
                 </div>
+            </template>
+            <template #subtitle>
+                <h2 class="text-center mt-0">SISTEMA DE VENTAS ALOGAR</h2>
             </template>
             <template #content>
                 <div class="login-sub-container">
@@ -81,15 +83,17 @@ const passwordRepeated = ref<string>('');
                             </InputGroup>
                         </div>
                     </Transition>
-                    <div class="link-options">
-                        <p>¿Olvidaste tu contraseña?</p>
-                        <p v-on:click="isLogin = !isLogin">{{ isLogin ? 'Crear Cuenta' : 'Iniciar Sesión' }}</p>
-                    </div>
-                    <div class="login-button">
-                        <Button>
-                            {{ isLogin ? 'Iniciar Sesión' : 'Crear Cuenta' }}
-                        </Button>
-                    </div>
+                </div>
+            </template>
+            <template #footer>
+                <div class="link-options">
+                    <p>¿Olvidaste tu contraseña?</p>
+                    <p v-on:click="isLogin = !isLogin">{{ isLogin ? 'Crear Cuenta' : 'Iniciar Sesión' }}</p>
+                </div>
+                <div class="login-button">
+                    <Button>
+                        {{ isLogin ? 'Iniciar Sesión' : 'Crear Cuenta' }}
+                    </Button>
                 </div>
             </template>
         </Card>
@@ -99,6 +103,14 @@ const passwordRepeated = ref<string>('');
 <style scoped>
 .login-container {
     width: min(100% - 2rem, 28rem);
+}
+
+.login-card :deep(.p-card-body) {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    box-sizing: border-box;
 }
 
 .title-container {
@@ -157,11 +169,10 @@ const passwordRepeated = ref<string>('');
 
     p {
         font-size: 16px;
-        color: rgb(24, 76, 71, 0.8);
+        color: rgb(24, 76, 71);
         cursor: pointer;
 
         &:hover {
-            color: rgb(24, 76, 71);
             font-weight: bold;
         }
     }
