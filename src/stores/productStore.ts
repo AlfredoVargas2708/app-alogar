@@ -12,6 +12,11 @@ interface ProductsResponse {
   productos: Product[]
 }
 
+interface AvailableResponse {
+  available: boolean
+  count: number
+}
+
 export const useProductStore = defineStore('products', () => {
   // Estado
   const products = ref<Product[]>([])
@@ -39,10 +44,20 @@ export const useProductStore = defineStore('products', () => {
     }
   }
 
+  async function cantidadPorDisponibilidad() {
+    try {
+      const response = await api.get<AvailableResponse[]>('/cant-available')
+      return response.data
+    } catch (err: unknown) {
+      error.value = getErrorMessage(err, 'Error al Obtener Tipos Disponibilidad')
+    }
+  }
+
   return {
     products,
     isLoading,
     error,
     fetchProducts,
+    cantidadPorDisponibilidad,
   }
 })

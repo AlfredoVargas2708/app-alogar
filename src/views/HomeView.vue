@@ -19,17 +19,15 @@ import InputNumber from 'primevue/inputnumber';
 interface AvailableOption {
     label: string;
     value: boolean;
+    total: number;
 }
 
 const router = useRouter()
-const { fetchProducts } = useProductStore();
+const { fetchProducts, cantidadPorDisponibilidad } = useProductStore();
 const nombreBuscador = ref<string>('');
 const nombreOptions = ref<[]>([]);
 const availableSelected = ref<AvailableOption[]>([]);
-const availableOptions = ref<AvailableOption[]>([
-    { label: 'Disponible', value: true },
-    { label: 'Agotado', value: false }
-]);
+const availableOptions = ref<AvailableOption[]>([]);
 const minPrice = ref<number | null>(null);
 const maxPrice = ref<number | null>(null);
 
@@ -49,6 +47,17 @@ function restartAvailable() {
 onMounted(() => {
     fetchProducts();
 });
+
+onMounted(async () => {
+    const disponibleOptions = await cantidadPorDisponibilidad();
+    disponibleOptions?.forEach(option => {
+        availableOptions.value.push({
+            label: option.available === true ? 'Disponible' : 'Agotado',
+            value: option.available,
+            total: option.count
+        })
+    });
+})
 
 </script>
 <template>
@@ -86,10 +95,14 @@ onMounted(() => {
                                 <Select placeholder="Disponibilidad del Producto" multiple v-model="availableSelected"
                                     :options="availableOptions" option-label="label" class="w-full">
                                     <template #option="slotProps">
-                                        <div class="flex items-center gap-2">
-                                            <Checkbox :modelValue="isItemSelected(slotProps.option)" binary
-                                                :tabindex="-1" readonly />
-                                            <span>{{ slotProps.option.label }}</span>
+                                        <div class="flex flex-row gap-1">
+                                            <div class="flex items-center gap-2">
+                                                <Checkbox :modelValue="isItemSelected(slotProps.option)" binary
+                                                    :tabindex="-1" readonly />
+                                                <span>{{ slotProps.option.label }}</span>
+                                            </div>
+                                            <span>({{ slotProps.option.total }})</span>
+
                                         </div>
                                     </template>
                                     <template #header>
