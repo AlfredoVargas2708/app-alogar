@@ -7,7 +7,7 @@ import Filter from '@primeicons/vue/filter';
 import Dollar from '@primeicons/vue/dollar';
 import { useRouter } from 'vue-router';
 import { useProductStore } from '@/stores/productStore';
-import { onMounted, ref } from 'vue';
+import { computed, getCurrentInstance, onMounted, ref } from 'vue';
 import InputGroup from 'primevue/inputgroup';
 import InputGroupAddon from 'primevue/inputgroupaddon';
 import FloatLabel from 'primevue/floatlabel';
@@ -23,13 +23,17 @@ interface AvailableOption {
 }
 
 const router = useRouter()
-const { fetchProducts, cantidadPorDisponibilidad } = useProductStore();
+const { fetchProducts, cantidadPorDisponibilidad, maximoPrecio } = useProductStore();
 const nombreBuscador = ref<string>('');
 const nombreOptions = ref<[]>([]);
 const availableSelected = ref<AvailableOption[]>([]);
 const availableOptions = ref<AvailableOption[]>([]);
 const minPrice = ref<number | null>(null);
 const maxPrice = ref<number | null>(null);
+const maxPriceLimit = ref<number>(0);
+const maxPricePlaceholder = ref<string>('');
+const instance = getCurrentInstance();
+const $filters = instance?.appContext.config.globalProperties.$filters;
 
 function logout() {
     localStorage.removeItem('username');
@@ -44,12 +48,15 @@ function restartAvailable() {
     availableSelected.value = [];
 }
 
-onMounted(() => {
-    fetchProducts();
-});
+const precioLimite = computed(() => {
+    return (maxPrice.value ?? 0) > maxPriceLimit.value
+})
 
 onMounted(async () => {
     const disponibleOptions = await cantidadPorDisponibilidad();
+    maxPriceLimit.value = await maximoPrecio() ?? 0;
+    const maxPrice = $filters.currency(maxPriceLimit.value);
+
     disponibleOptions?.forEach(option => {
         availableOptions.value.push({
             label: option.available === true ? 'Disponible' : 'Agotado',
@@ -57,7 +64,11 @@ onMounted(async () => {
             total: option.count
         })
     });
-})
+
+    maxPricePlaceholder.value = `Precio Máximo: ${maxPrice}`
+
+    fetchProducts();
+});
 
 </script>
 <template>
@@ -133,12 +144,20 @@ onMounted(async () => {
                                     <InputGroupAddon>
                                         <Dollar />
                                     </InputGroupAddon>
-                                    <FloatLabel>
-                                        <InputNumber input-id="max-price" mode="currency" v-model="maxPrice"
-                                            currency="CLP" locale="es-CL">
-                                        </InputNumber>
-                                        <label for="">Precio Máximo</label>
-                                    </FloatLabel>
+                                    <div class="flex flex-column w-full relative">
+                                        <FloatLabel>
+                                            <InputNumber input-id="max-price" mode="currency" v-model="maxPrice"
+                                                currency="CLP" locale="es-CL" :placeholder="maxPricePlaceholder"
+                                                :invalid="precioLimite" />
+                                            <!-- Se corrigió "max-prie" a "max-price" -->
+                                            <label for="max-price">Precio Máximo</label>
+                                        </FloatLabel>
+
+                                        <!-- El mensaje de error ahora vive fuera del FloatLabel -->
+                                        <small class="max-price-error" v-if="precioLimite">
+                                            Se superó el precio límite de {{ $filters.currency(maxPriceLimit) }}
+                                        </small>
+                                    </div>
                                 </InputGroup>
                             </div>
                         </div>
@@ -231,7 +250,7 @@ onMounted(async () => {
 
 .filters {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 500px));
+    grid-template-columns: repeat(auto-fill, minmax(200px, 550px));
     gap: 10px;
     justify-content: space-between;
 }
@@ -241,5 +260,12 @@ onMounted(async () => {
     justify-content: space-between;
     gap: 10px;
     width: 100%;
+}
+
+.max-price-error {
+    position: absolute;
+    top: 100%;
+    color: red;
+    font-size: 14px;
 }
 </style>

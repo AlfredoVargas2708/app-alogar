@@ -53,11 +53,21 @@ export const useProductStore = defineStore('products', () => {
     }
   }
 
+  async function maximoPrecio() {
+    try {
+      const response = await api.get<number>('/max-price')
+      return response.data
+    } catch (err: unknown) {
+      error.value = getErrorMessage(err, 'Errr al Obtner el Máximo de Precio')
+    }
+  }
+
   return {
     products,
     isLoading,
     error,
     fetchProducts,
     cantidadPorDisponibilidad,
+    maximoPrecio,
   }
 })

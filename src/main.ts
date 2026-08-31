@@ -18,5 +18,15 @@ app.use(PrimeVue, {
 
 app.use(createPinia())
 app.use(router)
+app.config.globalProperties.$filters = {
+  currency(value: number) {
+    const format = new Intl.NumberFormat('es-CL', {
+      style: 'currency',
+      currency: 'CLP',
+      maximumFractionDigits: 0,
+    })
+    return format.format(value)
+  },
+}
 
 app.mount('#app')
