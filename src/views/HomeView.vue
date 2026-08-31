@@ -1,10 +1,6 @@
 <script setup lang="ts">
 import Button from 'primevue/button';
 import Card from 'primevue/card';
-import SignOut from '@primeicons/vue/sign-out';
-import Search from '@primeicons/vue/search';
-import Filter from '@primeicons/vue/filter';
-import Dollar from '@primeicons/vue/dollar';
 import { useRouter } from 'vue-router';
 import { useProductStore } from '@/stores/productStore';
 import { computed, getCurrentInstance, onMounted, ref } from 'vue';
@@ -15,6 +11,7 @@ import AutoComplete from 'primevue/autocomplete';
 import Select from 'primevue/select';
 import Checkbox from 'primevue/checkbox';
 import InputNumber from 'primevue/inputnumber';
+import { Dollar, Filter, Search, SignOut } from '@/shared/icons';
 
 interface AvailableOption {
     label: string;
@@ -65,7 +62,7 @@ onMounted(async () => {
         })
     });
 
-    maxPricePlaceholder.value = `Precio Máximo: ${maxPrice}`
+    maxPricePlaceholder.value = `Precio Máximo: (${maxPrice})`
 
     fetchProducts();
 });
@@ -137,7 +134,7 @@ onMounted(async () => {
                                         <InputNumber input-id="min-price" v-model="minPrice" mode="currency"
                                             currency="CLP" locale="es-CL">
                                         </InputNumber>
-                                        <label for="min-price">Precio Mínimo</label>
+                                        <label for="min-price">Precio Mínimo:</label>
                                     </FloatLabel>
                                 </InputGroup>
                                 <InputGroup>
@@ -147,10 +144,9 @@ onMounted(async () => {
                                     <div class="flex flex-column w-full relative">
                                         <FloatLabel>
                                             <InputNumber input-id="max-price" mode="currency" v-model="maxPrice"
-                                                currency="CLP" locale="es-CL" :placeholder="maxPricePlaceholder"
-                                                :invalid="precioLimite" />
+                                                currency="CLP" locale="es-CL" :invalid="precioLimite" />
                                             <!-- Se corrigió "max-prie" a "max-price" -->
-                                            <label for="max-price">Precio Máximo</label>
+                                            <label for="max-price">{{ maxPricePlaceholder }}</label>
                                         </FloatLabel>
 
                                         <!-- El mensaje de error ahora vive fuera del FloatLabel -->

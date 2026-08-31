@@ -2,20 +2,17 @@
 import Card from 'primevue/card';
 import InputGroup from 'primevue/inputgroup';
 import InputGroupAddon from 'primevue/inputgroupaddon';
-import UserIcon from '@primeicons/vue/user';
 import { ref, watch } from 'vue';
 import InputText from 'primevue/inputtext';
 import FloatLabel from 'primevue/floatlabel';
-import Lock from '@primeicons/vue/lock';
 import Button from 'primevue/button';
 import { useUserStore } from '@/stores/userStore';
 import InputPassword from 'primevue/inputpassword';
 import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
-import Eye from '@primeicons/vue/eye';
-import EyeSlash from '@primeicons/vue/eye-slash';
 import { useRouter } from 'vue-router';
 import LoadingView from './LoadingView.vue';
+import { Eye, EyeSlash, Lock, UserIcon } from '@/shared/icons.ts';
 
 const isLogin = ref<boolean>(true);
 const isLoading = ref<boolean>(false);
@@ -29,7 +26,6 @@ const passwordRepeatedError = ref<string>('');
 const userStore = useUserStore();
 const router = useRouter();
 
-// Navigation to /home waits for both the login request and the loading bar animation to finish.
 const loginResolved = ref(false);
 const loadingComplete = ref(false);
 
