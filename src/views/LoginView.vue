@@ -14,8 +14,11 @@ import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
 import Eye from '@primeicons/vue/eye';
 import EyeSlash from '@primeicons/vue/eye-slash';
+import { useRouter } from 'vue-router';
+import LoadingView from './LoadingView.vue';
 
 const isLogin = ref<boolean>(true);
+const isLoading = ref<boolean>(false);
 const username = ref<string>('');
 const password = ref<string>('');
 const passwordMask = ref(true);
@@ -24,24 +27,46 @@ const passwordRepeatedMask = ref(true);
 const passwordRepeatedError = ref<string>('');
 
 const userStore = useUserStore();
+const router = useRouter();
+
+// Navigation to /home waits for both the login request and the loading bar animation to finish.
+const loginResolved = ref(false);
+const loadingComplete = ref(false);
+
+function goToHomeWhenReady() {
+    if (loginResolved.value && loadingComplete.value) {
+        router.push({ path: '/home' });
+    }
+}
+
+function onLoadingComplete() {
+    loadingComplete.value = true;
+    goToHomeWhenReady();
+}
 
 async function login() {
     const userBody = { usuario: username.value, password: password.value };
+    isLoading.value = true;
+    loginResolved.value = false;
+    loadingComplete.value = false;
 
     try {
         const user = await userStore.loginUser(userBody);
-        console.log(user);
+        localStorage.setItem('username', user?.usuario ?? '');
+        localStorage.setItem('password_has', user?.password ?? '');
     } catch (error: unknown) {
         console.error(error);
+    } finally {
+        loginResolved.value = true;
+        goToHomeWhenReady();
     }
 }
 
 async function signup() {
     const userBody = { usuario: username.value, password: password.value };
-
     try {
-        const user = await userStore.signUpUser(userBody)
-        console.log(user);
+        await userStore.signUpUser(userBody)
+        isLogin.value = true;
     } catch (error: unknown) {
         console.error(error);
     }
@@ -70,7 +95,7 @@ watch([password, passwordRepeated], validateSamePassword);
 </script>
 
 <template>
-    <div class="login-container">
+    <div class="login-container" v-if="!isLoading">
         <Card class="login-card max-w-sm w-full h-full" :class="isLogin ? 'front' : 'back'">
             <template #title>
                 <div class="title-container">
@@ -173,10 +198,14 @@ watch([password, passwordRepeated], validateSamePassword);
             </template>
         </Card>
     </div>
+    <div class="loading-container" v-else>
+        <LoadingView @complete="onLoadingComplete" />
+    </div>
 </template>
 
 <style scoped>
-.login-container {
+.login-container,
+.loading-container {
     width: min(100% - 2rem, 28rem);
 }
 
