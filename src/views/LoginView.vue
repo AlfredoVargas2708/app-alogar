@@ -53,7 +53,6 @@ async function login() {
     try {
         const user = await userStore.loginUser(userBody);
         localStorage.setItem('username', user?.usuario ?? '');
-        localStorage.setItem('password_has', user?.password ?? '');
     } catch (error: unknown) {
         console.error(error);
     } finally {

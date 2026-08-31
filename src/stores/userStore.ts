@@ -6,9 +6,7 @@ import api from '@/services/api'
 interface User {
   id: number
   usuario: string
-  password: string
-  ultimo_inicio_sesion: string
-  creado_en: string
+  ultimoInicioSesion: string
 }
 
 interface UserRequest {

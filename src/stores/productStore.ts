@@ -4,7 +4,13 @@ import axios from 'axios'
 import api from '@/services/api'
 
 type Product = Record<string, unknown>
-type NewProduct = Record<string, unknown>
+
+interface ProductsResponse {
+  total: number
+  pagina: number
+  totalPaginas: number
+  productos: Product[]
+}
 
 export const useProductStore = defineStore('products', () => {
   // Estado
@@ -24,23 +30,10 @@ export const useProductStore = defineStore('products', () => {
     isLoading.value = true
     error.value = null
     try {
-      const response = await api.get<Product[]>('/products')
-      products.value = response.data
+      const response = await api.get<ProductsResponse>('/products')
+      products.value = response.data.productos
     } catch (err: unknown) {
       error.value = getErrorMessage(err, 'Error al obtener productos')
-    } finally {
-      isLoading.value = false
-    }
-  }
-
-  async function addProduct(newProduct: NewProduct) {
-    isLoading.value = true
-    error.value = null
-    try {
-      const response = await api.post<Product>('/products', newProduct)
-      products.value.push(response.data)
-    } catch (err: unknown) {
-      error.value = getErrorMessage(err, 'Error al guardar producto')
     } finally {
       isLoading.value = false
     }
@@ -51,6 +44,5 @@ export const useProductStore = defineStore('products', () => {
     isLoading,
     error,
     fetchProducts,
-    addProduct,
   }
 })
