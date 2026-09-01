@@ -13,6 +13,8 @@ export interface Product {
   avaiable: boolean
   imageUrl: string
   source: string
+  offer_price: number | null
+  productType: string[]
 }
 
 export interface AvailableResponse {

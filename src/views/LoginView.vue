@@ -12,7 +12,9 @@ import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
 import { useRouter } from 'vue-router';
 import LoadingView from './LoadingView.vue';
-import { Eye, EyeSlash, Lock, UserIcon } from '@/shared/icons.ts';
+import { Eye, EyeSlash, Lock, Spinner, UserIcon } from '@/shared/icons.ts';
+import Toast from 'primevue/toast';
+import { useToast } from 'primevue/usetoast';
 
 const isLogin = ref<boolean>(true);
 const isLoading = ref<boolean>(false);
@@ -25,6 +27,7 @@ const passwordRepeatedError = ref<string>('');
 
 const userStore = useUserStore();
 const router = useRouter();
+const toast = useToast();
 
 const loginResolved = ref(false);
 const loadingComplete = ref(false);
@@ -42,18 +45,18 @@ function onLoadingComplete() {
 
 async function login() {
     const userBody = { usuario: username.value, password: password.value };
-    isLoading.value = true;
     loginResolved.value = false;
     loadingComplete.value = false;
 
     try {
         const user = await userStore.loginUser(userBody);
-        localStorage.setItem('username', user?.usuario ?? '');
+        localStorage.setItem('username', user.usuario);
+        loginResolved.value = true;
+        isLoading.value = true;
+        goToHomeWhenReady();
     } catch (error: unknown) {
         console.error(error);
-    } finally {
-        loginResolved.value = true;
-        goToHomeWhenReady();
+        toast.add({ summary: 'Inicio Sesión', detail: 'Error al Iniciar Sesión', severity: 'error' });
     }
 }
 
@@ -61,9 +64,11 @@ async function signup() {
     const userBody = { usuario: username.value, password: password.value };
     try {
         await userStore.signUpUser(userBody)
+        toast.add({ summary: 'Nuevo Usuario', detail: 'Cuenta Creada Correctamente. Puede iniciar sesión con los parámetros ingresados', severity: 'success' });
         isLogin.value = true;
     } catch (error: unknown) {
         console.error(error);
+        toast.add({ summary: 'Nuevo Usuario', detail: 'Error al Crear Cuenta', severity: 'error' });
     }
 }
 
@@ -186,8 +191,10 @@ watch([password, passwordRepeated], validateSamePassword);
                     <p v-on:click="isLogin = !isLogin">{{ isLogin ? 'Crear Cuenta' : 'Iniciar Sesión' }}</p>
                 </div>
                 <div class="login-button">
-                    <Button v-on:click="isLogin ? login() : signup()" :disabled="disableButton()">
+                    <Button v-on:click="isLogin ? login() : signup()"
+                        :disabled="disableButton() || userStore.isLoading">
                         {{ isLogin ? 'Iniciar Sesión' : 'Crear Cuenta' }}
+                        <Spinner spin :size="16" v-if="userStore.isLoading" />
                     </Button>
                 </div>
             </template>
@@ -196,6 +203,7 @@ watch([password, passwordRepeated], validateSamePassword);
     <div class="loading-container" v-else>
         <LoadingView @complete="onLoadingComplete" />
     </div>
+    <Toast />
 </template>
 
 <style scoped>
@@ -291,6 +299,14 @@ watch([password, passwordRepeated], validateSamePassword);
 
 .login-button {
     width: 100%;
+
+    .login-error {
+        display: block;
+        margin-top: 0.5rem;
+        font-size: 14px;
+        color: light-dark(#b91c1c, #fca5a5);
+        text-align: center;
+    }
 
     .p-button {
         width: 100%;

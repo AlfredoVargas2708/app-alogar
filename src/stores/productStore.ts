@@ -27,7 +27,9 @@ export const useProductStore = defineStore('products', () => {
     } catch (err: unknown) {
       error.value = getErrorMessage(err, 'Error al obtener productos')
     } finally {
-      isLoading.value = false
+      setTimeout(() => {
+        isLoading.value = false
+      }, 500)
     }
   }
 

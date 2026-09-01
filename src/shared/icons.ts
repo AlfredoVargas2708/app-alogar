@@ -6,5 +6,6 @@ import UserIcon from '@primeicons/vue/user'
 import Lock from '@primeicons/vue/lock'
 import Eye from '@primeicons/vue/eye'
 import EyeSlash from '@primeicons/vue/eye-slash'
+import Spinner from '@primeicons/vue/spinner'
 
-export { SignOut, Search, Filter, Dollar, UserIcon, Lock, Eye, EyeSlash }
+export { SignOut, Search, Filter, Dollar, UserIcon, Lock, Eye, EyeSlash, Spinner }

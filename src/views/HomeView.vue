@@ -2,8 +2,9 @@
 import Button from 'primevue/button';
 import Card from 'primevue/card';
 import { useRouter } from 'vue-router';
+import { storeToRefs } from 'pinia';
 import { useProductStore } from '@/stores/productStore';
-import { computed, getCurrentInstance, onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import InputGroup from 'primevue/inputgroup';
 import InputGroupAddon from 'primevue/inputgroupaddon';
 import FloatLabel from 'primevue/floatlabel';
@@ -11,6 +12,7 @@ import AutoComplete from 'primevue/autocomplete';
 import Select from 'primevue/select';
 import Checkbox from 'primevue/checkbox';
 import InputNumber from 'primevue/inputnumber';
+import ProgressBar from 'primevue/progressbar';
 import { Dollar, Filter, Search, SignOut } from '@/shared/icons';
 import ProductCard from '@/components/ProductCard.vue';
 
@@ -21,7 +23,9 @@ interface AvailableOption {
 }
 
 const router = useRouter()
-const { fetchProducts, cantidadPorDisponibilidad, maximoPrecio, products } = useProductStore();
+const productStore = useProductStore();
+const { fetchProducts, cantidadPorDisponibilidad, maximoPrecio } = productStore;
+const { products, isLoading } = storeToRefs(productStore);
 const nombreBuscador = ref<string>('');
 const nombreOptions = ref<[]>([]);
 const availableSelected = ref<AvailableOption[]>([]);
@@ -30,8 +34,6 @@ const minPrice = ref<number | null>(null);
 const maxPrice = ref<number | null>(null);
 const maxPriceLimit = ref<number>(0);
 const maxPricePlaceholder = ref<string>('');
-const instance = getCurrentInstance();
-const $filters = instance?.appContext.config.globalProperties.$filters;
 
 function logout() {
     localStorage.removeItem('username');
@@ -50,11 +52,19 @@ const precioLimite = computed(() => {
     return (maxPrice.value ?? 0) > maxPriceLimit.value
 })
 
-onMounted(async () => {
+function formatCurrency(value: number) {
+    return new Intl.NumberFormat('es-CL', {
+        style: 'currency',
+        currency: 'CLP',
+        maximumFractionDigits: 0,
+    }).format(value);
+}
+
+async function loadFilterOptions() {
     const disponibleOptions = await cantidadPorDisponibilidad();
     maxPriceLimit.value = await maximoPrecio() ?? 0;
-    const maxPrice = $filters.currency(maxPriceLimit.value);
 
+    availableOptions.value = [];
     disponibleOptions?.forEach(option => {
         availableOptions.value.push({
             label: option.available === true ? 'Disponible' : 'Agotado',
@@ -63,16 +73,19 @@ onMounted(async () => {
         })
     });
 
-    maxPricePlaceholder.value = `Precio Máximo: (${maxPrice})`
+    maxPricePlaceholder.value = `Precio Máximo: (${formatCurrency(maxPriceLimit.value)})`;
+}
 
-    fetchProducts();
+onMounted(() => {
+    void fetchProducts();
+    void loadFilterOptions();
 });
 
 </script>
 <template>
     <Card class="home-card">
         <template #content>
-            <div class="main-container">
+            <div class="main-container" v-if="!isLoading">
                 <div class="header">
                     <div class="image-container">
                         <img src="/logo-alogar.avif" alt="logo Alogar" />
@@ -159,7 +172,7 @@ onMounted(async () => {
 
                                         <!-- El mensaje de error ahora vive fuera del FloatLabel -->
                                         <small class="max-price-error" v-if="precioLimite">
-                                            Se superó el precio límite de {{ $filters.currency(maxPriceLimit) }}
+                                            Se superó el precio límite de {{ formatCurrency(maxPriceLimit) }}
                                         </small>
                                     </div>
                                 </InputGroup>
@@ -177,6 +190,11 @@ onMounted(async () => {
                     <h3 class="mt-0 px-5 py-2">Resumen Orden</h3>
                 </div>
             </div>
+            <div class="loading-bar" v-else>
+                <img src="/logo-alogar.avif" alt="logo Alogar" class="loading-logo" />
+                <ProgressBar mode="indeterminate" :show-value="false" class="progress-bar" />
+                <span>Cargando productos...</span>
+            </div>
         </template>
     </Card>
 </template>
@@ -185,7 +203,7 @@ onMounted(async () => {
 .home-card {
     width: 100%;
     height: 100%;
-    margin: 0px 10px;
+    margin: 10px;
     padding: 10px 15px;
 }
 
@@ -283,9 +301,59 @@ onMounted(async () => {
     align-items: center;
 }
 
+.products-list {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    flex: 1;
+}
+
+.list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    gap: 15px;
+    width: 100%;
+    flex: 1;
+    height: 100px;
+}
+
+.loading-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 2.5rem 2rem;
+    color: var(--color-principal);
+    font-size: 15px;
+    font-weight: bold;
+    font-style: italic;
+}
+
+.loading-logo {
+    width: 200px;
+    height: 50px;
+}
+
+.progress-bar {
+    width: min(100%, 28rem);
+    height: 10px;
+    overflow: hidden;
+}
+
+.progress-bar :deep(.p-progressbar-value) {
+    background-color: var(--color-principal);
+}
+
+@media (max-width: 640px) {
+    .list {
+        grid-template-columns: 1fr;
+    }
+}
+
 .order {
     grid-area: orden;
-    border-left: 1px solid var(--color-principal);
+    border-left: 1px dotted var(--color-principal);
     padding-left: 10px;
 }
 </style>

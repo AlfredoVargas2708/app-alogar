@@ -35,6 +35,9 @@ export const useUserStore = defineStore('users', () => {
       return response.data
     } catch (err: unknown) {
       error.value = getErrorMessage(err, 'Error al iniciar sesión')
+      throw err
+    } finally {
+      isLoading.value = false
     }
   }
 
@@ -46,6 +49,9 @@ export const useUserStore = defineStore('users', () => {
       return response.data
     } catch (err: unknown) {
       error.value = getErrorMessage(err, 'Error al crear cuenta')
+      throw err
+    } finally {
+      isLoading.value = false
     }
   }
 
