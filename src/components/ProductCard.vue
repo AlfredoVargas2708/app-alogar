@@ -162,7 +162,7 @@ const props = defineProps<{ product: Product }>()
     .product-types {
         display: flex;
         flex-direction: column;
-        gap: 4px;
+        gap: 5px;
 
         h4 {
             margin: 0;
@@ -176,8 +176,11 @@ const props = defineProps<{ product: Product }>()
         }
 
         .product-type {
-            padding: 5px;
-            font-size: medium;
+            padding: 5px 10px;
+            font-size: 14px;
+            background-color: var(--color-principal);
+            color: #FFFFFF;
+            text-transform: capitalize;
         }
     }
 }

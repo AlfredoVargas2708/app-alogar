@@ -24,12 +24,14 @@ interface AvailableOption {
 
 const router = useRouter()
 const productStore = useProductStore();
-const { fetchProducts, cantidadPorDisponibilidad, maximoPrecio } = productStore;
+const { fetchProducts, cantidadPorDisponibilidad, maximoPrecio, categorias } = productStore;
 const { products, isLoading } = storeToRefs(productStore);
 const nombreBuscador = ref<string>('');
 const nombreOptions = ref<[]>([]);
 const availableSelected = ref<AvailableOption[]>([]);
 const availableOptions = ref<AvailableOption[]>([]);
+const categoriesSelected = ref<string[]>([]);
+const categoriesOptions = ref<string[]>([]);
 const minPrice = ref<number | null>(null);
 const maxPrice = ref<number | null>(null);
 const maxPriceLimit = ref<number>(0);
@@ -43,10 +45,22 @@ function logout() {
 }
 
 const isItemSelected = (available: AvailableOption) => availableSelected.value.includes(available);
+const isCategorySelected = (category: string) => categoriesSelected.value.includes(category);
 
 function restartAvailable() {
     availableSelected.value = [];
 }
+
+function restartCategories() {
+    categoriesSelected.value = [];
+}
+
+const allSelected = computed(() => categoriesSelected.value.length === categoriesOptions.value.length);
+const indeterminate = computed(() => categoriesSelected.value.length > 0 && !allSelected.value);
+
+const onToggleAll = (checked: unknown) => {
+    categoriesSelected.value = checked ? categoriesOptions.value.map((c) => c) : [];
+};
 
 const precioLimite = computed(() => {
     return (maxPrice.value ?? 0) > maxPriceLimit.value
@@ -63,6 +77,7 @@ function formatCurrency(value: number) {
 async function loadFilterOptions() {
     const disponibleOptions = await cantidadPorDisponibilidad();
     maxPriceLimit.value = await maximoPrecio() ?? 0;
+    categoriesOptions.value = await categorias() ?? [];
 
     availableOptions.value = [];
     disponibleOptions?.forEach(option => {
@@ -177,6 +192,47 @@ onMounted(() => {
                                     </div>
                                 </InputGroup>
                             </div>
+                            <div class="categories-container">
+                                <InputGroup>
+                                    <InputGroupAddon>
+                                        <Filter />
+                                    </InputGroupAddon>
+                                    <Select placeholder="Categorias de Productos" multiple v-model="categoriesSelected"
+                                        :options="categoriesOptions" class="w-full capitalize">
+                                        <template #option="slotProps">
+                                            <div class="flex flex-row gap-1">
+                                                <div class="flex items-center gap-2">
+                                                    <Checkbox :modelValue="isCategorySelected(slotProps.option)" binary
+                                                        :tabindex="-1" readonly />
+                                                    <span class="capitalize">{{ slotProps.option }}</span>
+                                                </div>
+                                            </div>
+                                        </template>
+                                        <template #header>
+                                            <div class="flex flex-row align-items-center justify-content-between p-2">
+                                                <div class="flex flex-row align-items-center gap-2">
+                                                    <Checkbox :modelValue="allSelected" binary
+                                                        :indeterminate="indeterminate" @update:modelValue="onToggleAll"
+                                                        label="Select All" class="ml-1.5" />
+                                                    <span class="text-sm">{{ categoriesSelected.length }}
+                                                        seleccionados</span>
+                                                </div>
+                                                <span class="text-sm underline cursor-pointer"
+                                                    v-on:click="restartCategories()">Reestablecer</span>
+                                            </div>
+                                        </template>
+                                        <template #value="slotProps">
+                                            <div v-if="slotProps.value.length" class="selected-categories">
+                                                <span v-for="category in slotProps.value" :key="category"
+                                                    class="selected-category">
+                                                    {{ category }}
+                                                </span>
+                                            </div>
+                                            <span v-else>{{ slotProps.placeholder }}</span>
+                                        </template>
+                                    </Select>
+                                </InputGroup>
+                            </div>
                         </div>
                     </div>
                     <div class="products-list">
@@ -273,7 +329,10 @@ onMounted(() => {
 
 .filters {
     display: grid;
-    grid-template-areas: "nombre nombre disponible precios precios precios";
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2fr);
+    grid-template-areas:
+        "nombre disponible precios"
+        "categoria categoria categoria";
     align-items: center;
     gap: 20px;
     flex-wrap: wrap;
@@ -281,6 +340,10 @@ onMounted(() => {
 
 .name-container {
     grid-area: nombre;
+}
+
+.categories-container {
+    grid-area: categoria;
 }
 
 .available-container {
@@ -293,12 +356,28 @@ onMounted(() => {
 }
 
 .name-container,
+.categories-container,
 .available-container,
 .prices-container {
     width: 100%;
     height: 100%;
     display: flex;
     align-items: center;
+}
+
+.selected-categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    max-width: 100%;
+}
+
+.selected-category {
+    padding: 0.125rem 0.375rem;
+    border-radius: 4px;
+    background-color: color-mix(in srgb, var(--color-principal) 12%, transparent);
+    color: var(--color-principal);
+    line-height: 1.25;
 }
 
 .products-list {
@@ -311,7 +390,7 @@ onMounted(() => {
 
 .list {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(550px, 1fr));
     gap: 15px;
     width: 100%;
     flex: 1;

@@ -51,6 +51,15 @@ export const useProductStore = defineStore('products', () => {
     }
   }
 
+  async function categorias() {
+    try {
+      const response = await api.get<string[]>('/categories')
+      return response.data
+    } catch (err: unknown) {
+      error.value = getErrorMessage(err, 'Errr al Obtner el Máximo de Precio')
+    }
+  }
+
   return {
     products,
     isLoading,
@@ -58,5 +67,6 @@ export const useProductStore = defineStore('products', () => {
     fetchProducts,
     cantidadPorDisponibilidad,
     maximoPrecio,
+    categorias,
   }
 })
