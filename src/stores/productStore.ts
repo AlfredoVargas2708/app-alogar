@@ -9,6 +9,9 @@ export const useProductStore = defineStore('products', () => {
   const products = ref<Product[]>([])
   const isLoading = ref(false)
   const error = ref<string | null>(null)
+  const pagina = ref<number>(1)
+  const total = ref<number>(0)
+  const totalPaginas = ref<number>(1)
 
   function getErrorMessage(error: unknown, fallback: string) {
     if (axios.isAxiosError<{ message?: string }>(error)) {
@@ -18,12 +21,17 @@ export const useProductStore = defineStore('products', () => {
     return fallback
   }
 
-  async function fetchProducts() {
+  async function fetchProducts(page = 1, limit = 12) {
     isLoading.value = true
     error.value = null
     try {
-      const response = await api.get<ProductsResponse>('/products')
+      const response = await api.get<ProductsResponse>('/products', {
+        params: { pagina: page, limite: limit },
+      })
       products.value = response.data.productos
+      pagina.value = Number(response.data.pagina) || 1
+      total.value = Number(response.data.total) || 0
+      totalPaginas.value = Number(response.data.totalPaginas) || 1
     } catch (err: unknown) {
       error.value = getErrorMessage(err, 'Error al obtener productos')
     } finally {
@@ -68,5 +76,8 @@ export const useProductStore = defineStore('products', () => {
     cantidadPorDisponibilidad,
     maximoPrecio,
     categorias,
+    pagina,
+    total,
+    totalPaginas,
   }
 })

@@ -4,7 +4,7 @@ import Card from 'primevue/card';
 import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useProductStore } from '@/stores/productStore';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import InputGroup from 'primevue/inputgroup';
 import InputGroupAddon from 'primevue/inputgroupaddon';
 import FloatLabel from 'primevue/floatlabel';
@@ -15,6 +15,8 @@ import InputNumber from 'primevue/inputnumber';
 import ProgressBar from 'primevue/progressbar';
 import { Dollar, Filter, Search, SignOut } from '@/shared/icons';
 import ProductCard from '@/components/ProductCard.vue';
+import Paginator from 'primevue/paginator';
+import type { PageState } from 'primevue/paginator';
 
 interface AvailableOption {
     label: string;
@@ -25,7 +27,7 @@ interface AvailableOption {
 const router = useRouter()
 const productStore = useProductStore();
 const { fetchProducts, cantidadPorDisponibilidad, maximoPrecio, categorias } = productStore;
-const { products, isLoading } = storeToRefs(productStore);
+const { products, isLoading, pagina, total } = storeToRefs(productStore);
 const nombreBuscador = ref<string>('');
 const nombreOptions = ref<[]>([]);
 const availableSelected = ref<AvailableOption[]>([]);
@@ -36,6 +38,8 @@ const minPrice = ref<number | null>(null);
 const maxPrice = ref<number | null>(null);
 const maxPriceLimit = ref<number>(0);
 const maxPricePlaceholder = ref<string>('');
+const first = ref(0);
+const rows = ref(12);
 
 function logout() {
     localStorage.removeItem('username');
@@ -54,6 +58,15 @@ function restartAvailable() {
 function restartCategories() {
     categoriesSelected.value = [];
 }
+
+function changePage(event: PageState) {
+    console.log(event);
+    void fetchProducts(event.page + 1, event.rows);
+}
+
+watch(pagina, (currentPage) => {
+    first.value = (currentPage - 1) * rows.value;
+});
 
 const allSelected = computed(() => categoriesSelected.value.length === categoriesOptions.value.length);
 const indeterminate = computed(() => categoriesSelected.value.length > 0 && !allSelected.value);
@@ -92,7 +105,7 @@ async function loadFilterOptions() {
 }
 
 onMounted(() => {
-    void fetchProducts();
+    void fetchProducts(first.value + 1);
     void loadFilterOptions();
 });
 
@@ -173,24 +186,21 @@ onMounted(() => {
                                         <label for="min-price">Precio Mínimo:</label>
                                     </FloatLabel>
                                 </InputGroup>
-                                <InputGroup>
-                                    <InputGroupAddon>
-                                        <Dollar />
-                                    </InputGroupAddon>
-                                    <div class="flex flex-column w-full relative">
+                                <div class="max-price-container">
+                                    <InputGroup>
+                                        <InputGroupAddon>
+                                            <Dollar />
+                                        </InputGroupAddon>
                                         <FloatLabel>
                                             <InputNumber input-id="max-price" mode="currency" v-model="maxPrice"
                                                 currency="CLP" locale="es-CL" :invalid="precioLimite" />
-                                            <!-- Se corrigió "max-prie" a "max-price" -->
                                             <label for="max-price">{{ maxPricePlaceholder }}</label>
                                         </FloatLabel>
-
-                                        <!-- El mensaje de error ahora vive fuera del FloatLabel -->
-                                        <small class="max-price-error" v-if="precioLimite">
-                                            Se superó el precio límite de {{ formatCurrency(maxPriceLimit) }}
-                                        </small>
-                                    </div>
-                                </InputGroup>
+                                    </InputGroup>
+                                    <small class="max-price-error" v-if="precioLimite">
+                                        Se superó el precio límite de {{ formatCurrency(maxPriceLimit) }}
+                                    </small>
+                                </div>
                             </div>
                             <div class="categories-container">
                                 <InputGroup>
@@ -239,6 +249,12 @@ onMounted(() => {
                         <h3>Listado de Productos</h3>
                         <div class="list">
                             <ProductCard v-for="product in products" :key="product.id" :product="product" />
+                        </div>
+                        <div class="flex justify-content-center mt-2">
+                            <Paginator v-model:first="first" v-model:rows="rows" :totalRecords="total"
+                                :rowsPerPageOptions="[12, 24, 36, 48, 60]" @page="changePage($event)"
+                                currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} productos"
+                                template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink RowsPerPageDropdown" />
                         </div>
                     </div>
                 </div>
@@ -353,6 +369,11 @@ onMounted(() => {
 .prices-container {
     grid-area: precios;
     gap: 8px;
+}
+
+.max-price-container {
+    position: relative;
+    width: 100%;
 }
 
 .name-container,
