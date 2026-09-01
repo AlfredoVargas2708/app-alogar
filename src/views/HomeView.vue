@@ -12,6 +12,7 @@ import Select from 'primevue/select';
 import Checkbox from 'primevue/checkbox';
 import InputNumber from 'primevue/inputnumber';
 import { Dollar, Filter, Search, SignOut } from '@/shared/icons';
+import ProductCard from '@/components/ProductCard.vue';
 
 interface AvailableOption {
     label: string;
@@ -20,7 +21,7 @@ interface AvailableOption {
 }
 
 const router = useRouter()
-const { fetchProducts, cantidadPorDisponibilidad, maximoPrecio } = useProductStore();
+const { fetchProducts, cantidadPorDisponibilidad, maximoPrecio, products } = useProductStore();
 const nombreBuscador = ref<string>('');
 const nombreOptions = ref<[]>([]);
 const availableSelected = ref<AvailableOption[]>([]);
@@ -74,57 +75,64 @@ onMounted(async () => {
             <div class="main-container">
                 <div class="header">
                     <div class="image-container">
-                        <img src="/public/logo-alogar.avif" alt="" class="home-logo" />
+                        <img src="/logo-alogar.avif" alt="logo Alogar" />
                     </div>
-                    <h1 class="m-0 pb-2 font-italic text-5xl">Sistema de Ventas</h1>
-                    <Button class="sign-out-button" v-on:click="logout()">
-                        <SignOut :size="24" />
-                        Cerrar Sesión
-                    </Button>
+                    <h1 class="title m-0 pb-2 font-italic text-5xl">Sistema de Ventas</h1>
+                    <div class="button-container">
+                        <Button class="sign-out-button" v-on:click="logout()">
+                            <SignOut :size="24" />
+                            Cerrar Sesión
+                        </Button>
+                    </div>
                 </div>
                 <div class="products">
                     <div class="products-filters">
                         <h3 class="mt-0">Filtrar Productos</h3>
                         <div class="filters">
-                            <InputGroup>
-                                <InputGroupAddon>
-                                    <Search />
-                                </InputGroupAddon>
-                                <FloatLabel>
-                                    <AutoComplete v-model="nombreBuscador" :suggestions="nombreOptions"
-                                        option-label="title" />
-                                    <label for="">Buscar Por Nombre Producto</label>
-                                </FloatLabel>
-                            </InputGroup>
-                            <InputGroup>
-                                <InputGroupAddon>
-                                    <Filter />
-                                </InputGroupAddon>
-                                <Select placeholder="Disponibilidad del Producto" multiple v-model="availableSelected"
-                                    :options="availableOptions" option-label="label" class="w-full">
-                                    <template #option="slotProps">
-                                        <div class="flex flex-row gap-1">
-                                            <div class="flex items-center gap-2">
-                                                <Checkbox :modelValue="isItemSelected(slotProps.option)" binary
-                                                    :tabindex="-1" readonly />
-                                                <span>{{ slotProps.option.label }}</span>
-                                            </div>
-                                            <span>({{ slotProps.option.total }})</span>
+                            <div class="name-container">
+                                <InputGroup>
+                                    <InputGroupAddon>
+                                        <Search />
+                                    </InputGroupAddon>
+                                    <FloatLabel>
+                                        <AutoComplete v-model="nombreBuscador" :suggestions="nombreOptions"
+                                            option-label="title" />
+                                        <label for="">Buscar Por Nombre Producto</label>
+                                    </FloatLabel>
+                                </InputGroup>
+                            </div>
+                            <div class="available-container">
+                                <InputGroup>
+                                    <InputGroupAddon>
+                                        <Filter />
+                                    </InputGroupAddon>
+                                    <Select placeholder="Disponibilidad del Producto" multiple
+                                        v-model="availableSelected" :options="availableOptions" option-label="label"
+                                        class="w-full">
+                                        <template #option="slotProps">
+                                            <div class="flex flex-row gap-1">
+                                                <div class="flex items-center gap-2">
+                                                    <Checkbox :modelValue="isItemSelected(slotProps.option)" binary
+                                                        :tabindex="-1" readonly />
+                                                    <span>{{ slotProps.option.label }}</span>
+                                                </div>
+                                                <span>({{ slotProps.option.total }})</span>
 
-                                        </div>
-                                    </template>
-                                    <template #header>
-                                        <div class="flex flex-row align-items-center justify-content-between p-2">
-                                            <div class="flex flex-row align-items-center gap-2">
-                                                <span class="text-sm">{{ availableSelected.length }}
-                                                    seleccionados</span>
                                             </div>
-                                            <span class="text-sm underline cursor-pointer"
-                                                v-on:click="restartAvailable()">Reestablecer</span>
-                                        </div>
-                                    </template>
-                                </Select>
-                            </InputGroup>
+                                        </template>
+                                        <template #header>
+                                            <div class="flex flex-row align-items-center justify-content-between p-2">
+                                                <div class="flex flex-row align-items-center gap-2">
+                                                    <span class="text-sm">{{ availableSelected.length }}
+                                                        seleccionados</span>
+                                                </div>
+                                                <span class="text-sm underline cursor-pointer"
+                                                    v-on:click="restartAvailable()">Reestablecer</span>
+                                            </div>
+                                        </template>
+                                    </Select>
+                                </InputGroup>
+                            </div>
                             <div class="prices-container">
                                 <InputGroup>
                                     <InputGroupAddon>
@@ -159,9 +167,15 @@ onMounted(async () => {
                         </div>
                     </div>
                     <div class="products-list">
+                        <h3>Listado de Productos</h3>
+                        <div class="list">
+                            <ProductCard v-for="product in products" :key="product.id" :product="product" />
+                        </div>
                     </div>
                 </div>
-                <div class="order"></div>
+                <div class="order">
+                    <h3 class="mt-0 px-5 py-2">Resumen Orden</h3>
+                </div>
             </div>
         </template>
     </Card>
@@ -169,99 +183,109 @@ onMounted(async () => {
 
 <style scoped>
 .home-card {
-    width: min(100% - 2rem, 100%);
-    height: calc(100dvh - 2rem);
-    box-sizing: border-box;
-}
-
-.home-card :deep(.p-card-body) {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+    width: 100%;
     height: 100%;
-    box-sizing: border-box;
+    margin: 0px 10px;
+    padding: 10px 15px;
 }
 
 .main-container {
-    width: 100%;
-    height: 100%;
     display: grid;
     grid-template-areas:
-        "cabecera cabecera cabecera cabecera"
-        "contenido contenido contenido sidebar";
-    column-gap: 10px;
-    row-gap: 15px;
+        "header header header"
+        "productos productos orden";
 }
 
 .header {
-    grid-area: cabecera;
-    display: flex;
-    justify-content: space-between;
+    grid-area: header;
+    display: grid;
+    grid-template-areas: "logo titulo titulo titulo titulo boton";
+    padding-bottom: 10px;
     align-items: center;
 }
 
 .image-container {
-    width: 200px;
-    height: 55px;
+    grid-area: logo;
+    display: flex;
+    justify-content: start;
+    align-items: center;
 }
 
-.home-logo {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
+.title {
+    grid-area: titulo;
+    text-align: center;
 }
 
-.sign-out-button.p-button {
-    background-color: rgb(24, 76, 71);
-    border: 1px solid #FFFFFF;
+.button-container {
+    grid-area: boton;
+    display: flex;
+    justify-content: end;
+    align-items: center;
     height: 100%;
-    width: 200px;
-    font-size: 22px;
+
+    .p-button {
+        width: 150px;
+        height: 50px;
+        background-color: var(--color-principal);
+        border: none;
+
+        &:hover {
+            background-color: #FFFFFF;
+            border: 1px solid var(--color-principal);
+            color: var(--color-principal);
+        }
+    }
 }
 
 .products {
-    grid-area: contenido;
-    gap: 20px;
-}
-
-.order {
-    grid-area: sidebar;
-}
-
-.products,
-.order {
+    grid-area: productos;
     display: flex;
     flex-direction: column;
-    border: 1px solid rgb(24, 76, 71);
+    width: 100%;
     height: 100%;
-    border-radius: 15px;
-    padding: 10px 15px;
+    padding-right: 10px;
 }
 
 .products-filters {
     display: flex;
     flex-direction: column;
     width: 100%;
+    height: 100%;
 }
 
 .filters {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 550px));
-    gap: 10px;
-    justify-content: space-between;
+    grid-template-areas: "nombre nombre disponible precios precios precios";
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.name-container {
+    grid-area: nombre;
+}
+
+.available-container {
+    grid-area: disponible;
 }
 
 .prices-container {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    width: 100%;
+    grid-area: precios;
+    gap: 8px;
 }
 
-.max-price-error {
-    position: absolute;
-    top: 100%;
-    color: red;
-    font-size: 14px;
+.name-container,
+.available-container,
+.prices-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.order {
+    grid-area: orden;
+    border-left: 1px solid var(--color-principal);
+    padding-left: 10px;
 }
 </style>

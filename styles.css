@@ -1,5 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap');
 
+:root {
+  --color-principal: rgb(24, 76, 71);
+}
+
 span,
 label,
 p,
@@ -11,5 +15,5 @@ h5,
 h6,
 .p-button {
   font-family: 'Figtree', sans-serif !important;
-  color: rgb(24, 76, 71);
+  color: var(--color-principal);
 }

@@ -94,7 +94,7 @@ watch([password, passwordRepeated], validateSamePassword);
         <Card class="login-card max-w-sm w-full h-full" :class="isLogin ? 'front' : 'back'">
             <template #title>
                 <div class="title-container">
-                    <img src="/public/logo-alogar.avif" alt="">
+                    <img src="/logo-alogar.avif" alt="">
                     <Transition name="title-switch" mode="out-in">
                         <h1 v-if="isLogin" key="login-title" class="text-center mt-1 font-italic">Iniciar Sesión</h1>
                         <h1 v-else key="signup-title" class="text-center mt-1 font-italic">Crear Cuenta</h1>

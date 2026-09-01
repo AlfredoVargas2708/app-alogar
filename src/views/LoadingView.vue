@@ -28,7 +28,7 @@ onBeforeUnmount(() => {
 </script>
 <template>
     <div class="loading-card">
-        <img src="/public/logo-alogar.avif" alt="" class="loading-logo" />
+        <img src="/logo-alogar.avif" alt="" class="loading-logo" />
         <ProgressBar :value="value" :showValue="false" class="loading-bar" />
         <span class="loading-text">Cargando... {{ value }}%</span>
     </div>
