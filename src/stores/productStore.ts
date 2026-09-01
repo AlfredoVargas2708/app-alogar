@@ -21,12 +21,12 @@ export const useProductStore = defineStore('products', () => {
     return fallback
   }
 
-  async function fetchProducts(page = 1, limit = 12) {
+  async function fetchProducts(page = 1, limit = 12, nombre = '') {
     isLoading.value = true
     error.value = null
     try {
       const response = await api.get<ProductsResponse>('/products', {
-        params: { pagina: page, limite: limit },
+        params: { pagina: page, limite: limit, busqueda: encodeURIComponent(nombre) },
       })
       products.value = response.data.productos
       pagina.value = Number(response.data.pagina) || 1
@@ -64,7 +64,19 @@ export const useProductStore = defineStore('products', () => {
       const response = await api.get<string[]>('/categories')
       return response.data
     } catch (err: unknown) {
-      error.value = getErrorMessage(err, 'Errr al Obtner el Máximo de Precio')
+      error.value = getErrorMessage(err, 'Error al Obtner el Máximo de Precio')
+    }
+  }
+
+  async function buscadorNombres(name: string) {
+    try {
+      const response = await api.get<string[]>('/products-names', {
+        params: { name },
+      })
+      return response.data
+    } catch (err: unknown) {
+      error.value = getErrorMessage(err, 'Error al Obtener Opciones de Nombre')
+      return []
     }
   }
 
@@ -79,5 +91,6 @@ export const useProductStore = defineStore('products', () => {
     pagina,
     total,
     totalPaginas,
+    buscadorNombres,
   }
 })

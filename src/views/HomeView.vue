@@ -4,7 +4,7 @@ import Card from 'primevue/card';
 import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useProductStore } from '@/stores/productStore';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import InputGroup from 'primevue/inputgroup';
 import InputGroupAddon from 'primevue/inputgroupaddon';
 import FloatLabel from 'primevue/floatlabel';
@@ -17,6 +17,8 @@ import { Dollar, Filter, Search, SignOut } from '@/shared/icons';
 import ProductCard from '@/components/ProductCard.vue';
 import Paginator from 'primevue/paginator';
 import type { PageState } from 'primevue/paginator';
+import type { AutoCompleteOptionSelectEvent } from 'primevue/autocomplete';
+import { debounce } from 'lodash-es'
 
 interface AvailableOption {
     label: string;
@@ -26,10 +28,12 @@ interface AvailableOption {
 
 const router = useRouter()
 const productStore = useProductStore();
-const { fetchProducts, cantidadPorDisponibilidad, maximoPrecio, categorias } = productStore;
+const { fetchProducts, cantidadPorDisponibilidad, maximoPrecio, categorias, buscadorNombres } = productStore;
 const { products, isLoading, pagina, total } = storeToRefs(productStore);
 const nombreBuscador = ref<string>('');
-const nombreOptions = ref<[]>([]);
+const nombreOptions = ref<string[]>([]);
+const isNameLoading = ref<boolean>(false);
+const nameAutoComplete = ref<{ show: () => void } | null>(null);
 const availableSelected = ref<AvailableOption[]>([]);
 const availableOptions = ref<AvailableOption[]>([]);
 const categoriesSelected = ref<string[]>([]);
@@ -40,6 +44,8 @@ const maxPriceLimit = ref<number>(0);
 const maxPricePlaceholder = ref<string>('');
 const first = ref(0);
 const rows = ref(12);
+let skipNextNameSearch = false;
+let nameSearchRequest = 0;
 
 function logout() {
     localStorage.removeItem('username');
@@ -68,6 +74,49 @@ watch(pagina, (currentPage) => {
     first.value = (currentPage - 1) * rows.value;
 });
 
+const searchProductNames = debounce(async (newQuery: string) => {
+    if (skipNextNameSearch) {
+        skipNextNameSearch = false;
+        return;
+    }
+
+    const request = ++nameSearchRequest;
+    if (!newQuery.trim()) {
+        nombreOptions.value = [];
+        isNameLoading.value = false;
+        void fetchProducts(pagina.value, rows.value)
+        return;
+    }
+
+    isNameLoading.value = true;
+    try {
+        const names = await buscadorNombres(newQuery.trim()) ?? [];
+        if (request !== nameSearchRequest) {
+            return;
+        }
+
+        nombreOptions.value = names;
+        await nextTick();
+
+        if (names.length > 0) {
+            nameAutoComplete.value?.show();
+        }
+    } catch (error) {
+        console.error('Error en la busqueda', error);
+    } finally {
+        if (request === nameSearchRequest) {
+            isNameLoading.value = false;
+        }
+    }
+}, 300);
+
+watch(nombreBuscador, searchProductNames);
+
+function onClearBuscador() {
+    nombreOptions.value = [];
+    void fetchProducts(pagina.value, rows.value);
+}
+
 const allSelected = computed(() => categoriesSelected.value.length === categoriesOptions.value.length);
 const indeterminate = computed(() => categoriesSelected.value.length > 0 && !allSelected.value);
 
@@ -85,6 +134,16 @@ function formatCurrency(value: number) {
         currency: 'CLP',
         maximumFractionDigits: 0,
     }).format(value);
+}
+
+function onSelectProduct(event: AutoCompleteOptionSelectEvent) {
+    skipNextNameSearch = true;
+    nameSearchRequest++;
+    searchProductNames.cancel();
+    nombreOptions.value = [];
+    isNameLoading.value = false;
+    first.value = 0;
+    void fetchProducts(1, rows.value, event.value)
 }
 
 async function loadFilterOptions() {
@@ -136,8 +195,10 @@ onMounted(() => {
                                         <Search />
                                     </InputGroupAddon>
                                     <FloatLabel>
-                                        <AutoComplete v-model="nombreBuscador" :suggestions="nombreOptions"
-                                            option-label="title" />
+                                        <AutoComplete ref="nameAutoComplete" v-model="nombreBuscador"
+                                            :suggestions="nombreOptions" :loading="isNameLoading"
+                                            :show-empty-message="false" @option-select="onSelectProduct"
+                                            :show-clear="true" @clear="onClearBuscador" />
                                         <label for="">Buscar Por Nombre Producto</label>
                                     </FloatLabel>
                                 </InputGroup>
