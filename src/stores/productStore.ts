@@ -21,12 +21,22 @@ export const useProductStore = defineStore('products', () => {
     return fallback
   }
 
-  async function fetchProducts(page = 1, limit = 12, nombre = '') {
+  async function fetchProducts(
+    page = 1,
+    limit = 12,
+    nombre?: string | null,
+    available?: boolean | null,
+  ) {
     isLoading.value = true
     error.value = null
     try {
       const response = await api.get<ProductsResponse>('/products', {
-        params: { pagina: page, limite: limit, busqueda: encodeURIComponent(nombre) },
+        params: {
+          pagina: page,
+          limite: limit,
+          ...(nombre ? { busqueda: encodeURIComponent(nombre ?? '') } : {}),
+          ...(available !== undefined && available !== null ? { disponible: available } : {}),
+        },
       })
       products.value = response.data.productos
       pagina.value = Number(response.data.pagina) || 1

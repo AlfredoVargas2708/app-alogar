@@ -11,8 +11,8 @@ const props = defineProps<{ product: Product }>()
         <template #content>
             <div class="product-body">
                 <div class="product-image">
-                    <span class="product-status" :class="{ unavailable: !props.product.avaiable }">
-                        {{ props.product.avaiable ? 'Disponible' : 'Agotado' }}
+                    <span class="product-status" :class="{ unavailable: !props.product.available }">
+                        {{ props.product.available ? 'Disponible' : 'Agotado' }}
                     </span>
                     <span class="product-offer" :class="{ 'with-offer': props.product.offer_price }">
                         En Oferta
@@ -90,8 +90,14 @@ const props = defineProps<{ product: Product }>()
         position: absolute;
         padding: 5px;
         border-radius: 10px;
-        border: 1px solid var(--color-principal);
-        background-color: #FFFFFF;
+    }
+
+    .product-status {
+        top: 5%;
+        left: 5%;
+        border: 1px solid #FFFFFF;
+        background-color: var(--color-principal);
+        color: #FFFFFF;
 
         &.unavailable {
             background-color: red;
@@ -100,14 +106,11 @@ const props = defineProps<{ product: Product }>()
         }
     }
 
-    .product-status {
-        top: 5%;
-        left: 5%;
-    }
-
     .product-offer {
         top: 5%;
         right: 5%;
+        border: 1px solid var(--color-principal);
+        background-color: #FFFFFF;
     }
 
     img {

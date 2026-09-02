@@ -10,7 +10,7 @@ export interface Product {
   title: string
   handle: string
   price: number
-  avaiable: boolean
+  available: boolean
   imageUrl: string
   source: string
   offer_price: number | null

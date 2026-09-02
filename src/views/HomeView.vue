@@ -30,7 +30,7 @@ const router = useRouter()
 const productStore = useProductStore();
 const { fetchProducts, cantidadPorDisponibilidad, maximoPrecio, categorias, buscadorNombres } = productStore;
 const { products, isLoading, pagina, total } = storeToRefs(productStore);
-const nombreBuscador = ref<string>('');
+const nombreBuscador = ref<string | null>(null);
 const nombreOptions = ref<string[]>([]);
 const isNameLoading = ref<boolean>(false);
 const nameAutoComplete = ref<{ show: () => void } | null>(null);
@@ -66,7 +66,6 @@ function restartCategories() {
 }
 
 function changePage(event: PageState) {
-    console.log(event);
     void fetchProducts(event.page + 1, event.rows);
 }
 
@@ -74,14 +73,20 @@ watch(pagina, (currentPage) => {
     first.value = (currentPage - 1) * rows.value;
 });
 
-const searchProductNames = debounce(async (newQuery: string) => {
+watch(availableSelected, (available) => {
+    // Solo se envía el filtro cuando hay una única opción seleccionada (disponible o agotado)
+    const disponible = available.length === 1 ? available[0]!.value : undefined;
+    void fetchProducts(pagina.value, rows.value, null, disponible)
+})
+
+const searchProductNames = debounce(async (newQuery: string | null) => {
     if (skipNextNameSearch) {
         skipNextNameSearch = false;
         return;
     }
 
     const request = ++nameSearchRequest;
-    if (!newQuery.trim()) {
+    if (!newQuery || !newQuery.trim()) {
         nombreOptions.value = [];
         isNameLoading.value = false;
         void fetchProducts(pagina.value, rows.value)
