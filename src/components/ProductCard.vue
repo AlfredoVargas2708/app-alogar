@@ -1,10 +1,23 @@
 <script setup lang="ts">
 import type { Product } from '@/interfaces/products.interface';
 import { ShoppingCart } from '@/shared/icons';
+import { useProductStore } from '@/stores/productStore';
+import { storeToRefs } from 'pinia';
 import type Button from 'primevue/button';
 import Tag from 'primevue/tag';
+import { computed } from 'vue';
 
 const props = defineProps<{ product: Product }>()
+
+const productStore = useProductStore();
+const { addOrdenProduct } = productStore;
+const { ordenProducts } = storeToRefs(productStore)
+
+const isInOrden = computed(() => ordenProducts.value.some(product => product.id === props.product.id))
+
+function addProduct() {
+    void addOrdenProduct(props.product);
+}
 </script>
 
 <template>
@@ -43,7 +56,7 @@ const props = defineProps<{ product: Product }>()
             </div>
         </div>
         <div class="product-footer">
-            <Button class="button" :disabled="!props.product.available">
+            <Button class="button" :disabled="!props.product.available || isInOrden" @click="addProduct">
                 <ShoppingCart :size="18" />
                 Agregar al carrito
             </Button>

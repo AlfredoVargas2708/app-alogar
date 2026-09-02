@@ -12,6 +12,7 @@ export const useProductStore = defineStore('products', () => {
   const pagina = ref<number>(1)
   const total = ref<number>(0)
   const totalPaginas = ref<number>(1)
+  const ordenProducts = ref<Product[]>([])
 
   function getErrorMessage(error: unknown, fallback: string) {
     if (axios.isAxiosError<{ message?: string }>(error)) {
@@ -90,6 +91,11 @@ export const useProductStore = defineStore('products', () => {
     }
   }
 
+  function addOrdenProduct(product: Product) {
+    ordenProducts.value.push(product)
+    console.log(ordenProducts)
+  }
+
   return {
     products,
     isLoading,
@@ -102,5 +108,7 @@ export const useProductStore = defineStore('products', () => {
     total,
     totalPaginas,
     buscadorNombres,
+    ordenProducts,
+    addOrdenProduct,
   }
 })
