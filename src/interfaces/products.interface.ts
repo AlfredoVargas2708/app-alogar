@@ -21,3 +21,9 @@ export interface AvailableResponse {
   available: boolean
   count: number
 }
+
+export interface AvailableFilterOption {
+  label: string
+  value: boolean
+  total: number
+}
