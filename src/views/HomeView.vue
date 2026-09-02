@@ -22,7 +22,7 @@ const categoriesOptions = ref<string[]>([]);
 const maxPriceLimit = ref<number>(0);
 const maxPricePlaceholder = ref<string>('');
 const first = ref(0);
-const rows = ref(15);
+const rows = ref(12);
 
 function logout() {
     localStorage.removeItem('username');

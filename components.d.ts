@@ -19,6 +19,7 @@ declare module 'vue' {
     InputGroup: typeof import('primevue/inputgroup')['default']
     InputGroupAddon: typeof import('primevue/inputgroupaddon')['default']
     InputNumber: typeof import('primevue/inputnumber')['default']
+    InputText: typeof import('primevue/inputtext')['default']
     OrderSummary: typeof import('./src/components/home/OrderSummary.vue')['default']
     Paginator: typeof import('primevue/paginator')['default']
     ProductCard: typeof import('./src/components/ProductCard.vue')['default']

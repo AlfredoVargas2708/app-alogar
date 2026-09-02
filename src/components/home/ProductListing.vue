@@ -30,7 +30,7 @@ const rows = defineModel<number>('rows', { required: true });
             </div>
             <div class="flex justify-content-center mt-2 paginator-container">
                 <Paginator v-model:first="first" v-model:rows="rows" :totalRecords="total"
-                    :rowsPerPageOptions="[15, 30, 45, 60]" @page="$emit('page', $event)"
+                    :rowsPerPageOptions="[12, 24, 36, 48, 60]" @page="$emit('page', $event)"
                     currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} productos"
                     template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink RowsPerPageDropdown" />
             </div>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import InputGroup from 'primevue/inputgroup';
 import InputGroupAddon from 'primevue/inputgroupaddon';
 import FloatLabel from 'primevue/floatlabel';
@@ -13,6 +13,7 @@ import { Dollar, Filter, Search } from '@/shared/icons';
 import { formatCurrency } from '@/shared/currency';
 import { useProductStore } from '@/stores/productStore';
 import type { AvailableFilterOption } from '@/interfaces/products.interface';
+import InputText from 'primevue/inputtext';
 
 const props = defineProps<{
     availableOptions: AvailableFilterOption[];
@@ -32,6 +33,7 @@ const { buscadorNombres } = useProductStore();
 
 const nombreBuscador = ref<string | null>(null);
 const nombreOptions = ref<string[]>([]);
+const barcodeSearch = ref<string | null>(null);
 const isNameLoading = ref<boolean>(false);
 const nameAutoComplete = ref<{ show: () => void } | null>(null);
 const categoriesSelected = ref<string[]>([]);
@@ -113,12 +115,62 @@ const onToggleAll = (checked: unknown) => {
 const precioLimite = computed(() => {
     return (maxPrice.value ?? 0) > props.maxPriceLimit
 })
+
+const mainInputRef = ref<InstanceType<typeof InputText> | null>(null)
+
+// Función para forzar el foco en el input principal
+const keepFocus = () => {
+    nextTick(() => {
+        // Comprobar si el elemento activo actual es otro input/textarea/select o un componente de PrimeVue
+        const activeEl = document.activeElement
+        const isAnotherInput = activeEl && (
+            activeEl.tagName === 'INPUT' ||
+            activeEl.tagName === 'TEXTAREA' ||
+            activeEl.tagName === 'SELECT' ||
+            activeEl.classList.contains('p-inputtext') ||
+            activeEl.closest('.p-component') // Cubre dropdowns, calendar, etc. de PrimeVue
+        )
+
+        // Si no se está enfocando otro input válido, regresa el foco al principal
+        if (!isAnotherInput && mainInputRef.value) {
+            const element = (mainInputRef.value as unknown as { $el: HTMLInputElement }).$el
+            element?.focus()
+        }
+    })
+}
+
+const handleFocusOut = () => {
+    // Pequeña espera para dar tiempo al navegador de actualizar document.activeElement
+    setTimeout(() => {
+        keepFocus()
+    }, 10)
+}
+
+onMounted(() => {
+    keepFocus()
+    window.addEventListener('focusout', handleFocusOut)
+})
+
+onUnmounted(() => {
+    window.removeEventListener('focusout', handleFocusOut)
+})
 </script>
 
 <template>
     <div class="products-filters">
         <h3 class="mt-0">Filtrar Productos</h3>
         <div class="filters">
+            <div class="barcode-container">
+                <InputGroup>
+                    <InputGroupAddon>
+                        <Search />
+                    </InputGroupAddon>
+                    <FloatLabel>
+                        <InputText ref="mainInputRef" v-model="barcodeSearch" :autofocus="true" />
+                        <label for="">Buscar Por Código de Barras</label>
+                    </FloatLabel>
+                </InputGroup>
+            </div>
             <div class="name-container">
                 <InputGroup>
                     <InputGroupAddon>
@@ -246,11 +298,16 @@ const precioLimite = computed(() => {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2fr);
     grid-template-areas:
-        "nombre disponible precios"
+        "codigo nombre nombre"
+        "disponible precios precios"
         "categoria categoria categoria";
     align-items: center;
     gap: 20px;
     flex-wrap: wrap;
+}
+
+.barcode-container {
+    grid-area: codigo;
 }
 
 .name-container {
