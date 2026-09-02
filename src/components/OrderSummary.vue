@@ -1,6 +1,9 @@
 <template>
     <div class="order">
         <h3 class="mt-0 px-5 py-2">Resumen Orden</h3>
+        <div class="summary">
+
+        </div>
     </div>
 </template>
 

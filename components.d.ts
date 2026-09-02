@@ -11,7 +11,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    AppHeader: typeof import('./src/components/home/AppHeader.vue')['default']
+    AppHeader: typeof import('./src/components/AppHeader.vue')['default']
     AutoComplete: typeof import('primevue/autocomplete')['default']
     Button: typeof import('primevue/button')['default']
     Checkbox: typeof import('primevue/checkbox')['default']
@@ -20,11 +20,11 @@ declare module 'vue' {
     InputGroupAddon: typeof import('primevue/inputgroupaddon')['default']
     InputNumber: typeof import('primevue/inputnumber')['default']
     InputText: typeof import('primevue/inputtext')['default']
-    OrderSummary: typeof import('./src/components/home/OrderSummary.vue')['default']
+    OrderSummary: typeof import('./src/components/OrderSummary.vue')['default']
     Paginator: typeof import('primevue/paginator')['default']
     ProductCard: typeof import('./src/components/ProductCard.vue')['default']
-    ProductFilters: typeof import('./src/components/home/ProductFilters.vue')['default']
-    ProductListing: typeof import('./src/components/home/ProductListing.vue')['default']
+    ProductFilters: typeof import('./src/components/ProductFilters.vue')['default']
+    ProductListing: typeof import('./src/components/ProductListing.vue')['default']
     ProgressBar: typeof import('primevue/progressbar')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

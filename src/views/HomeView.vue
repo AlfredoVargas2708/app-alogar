@@ -7,10 +7,10 @@ import { onMounted, ref, watch } from 'vue';
 import type { PageState } from 'primevue/paginator';
 import { formatCurrency } from '@/shared/currency';
 import type { AvailableFilterOption } from '@/interfaces/products.interface';
-import AppHeader from '@/components/home/AppHeader.vue';
-import ProductFilters from '@/components/home/ProductFilters.vue';
-import ProductListing from '@/components/home/ProductListing.vue';
-import OrderSummary from '@/components/home/OrderSummary.vue';
+import AppHeader from '@/components/AppHeader.vue';
+import ProductFilters from '@/components/ProductFilters.vue';
+import ProductListing from '@/components/ProductListing.vue';
+import OrderSummary from '@/components/OrderSummary.vue';
 
 const router = useRouter()
 const productStore = useProductStore();
