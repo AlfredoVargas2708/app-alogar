@@ -22,8 +22,8 @@ export const useProductStore = defineStore('products', () => {
   }
 
   async function fetchProducts(
-    page = 1,
-    limit = 12,
+    page: number,
+    limit: number,
     nombre?: string | null,
     available?: boolean | null,
   ) {
