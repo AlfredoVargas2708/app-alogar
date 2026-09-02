@@ -169,7 +169,7 @@ async function loadFilterOptions() {
 }
 
 onMounted(() => {
-    void fetchProducts(first.value + 1);
+    void fetchProducts(first.value + 1, rows.value);
     void loadFilterOptions();
 });
 
@@ -177,7 +177,7 @@ onMounted(() => {
 <template>
     <Card class="home-card">
         <template #content>
-            <div class="main-container" v-if="!isLoading">
+            <div class="main-container">
                 <div class="header">
                     <div class="image-container">
                         <img src="/logo-alogar.avif" alt="logo Alogar" />
@@ -313,25 +313,26 @@ onMounted(() => {
                     </div>
                     <div class="products-list">
                         <h3>Listado de Productos</h3>
-                        <div class="list">
-                            <ProductCard v-for="product in products" :key="product.id" :product="product" />
+                        <div class="loading-bar" v-if="isLoading">
+                            <ProgressBar mode="indeterminate" :show-value="false" class="progress-bar" />
+                            <span>Cargando productos...</span>
                         </div>
-                        <div class="flex justify-content-center mt-2">
-                            <Paginator v-model:first="first" v-model:rows="rows" :totalRecords="total"
-                                :rowsPerPageOptions="[12, 24, 36, 48, 60]" @page="changePage($event)"
-                                currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} productos"
-                                template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink RowsPerPageDropdown" />
-                        </div>
+                        <template v-else>
+                            <div class="list">
+                                <ProductCard v-for="product in products" :key="product.id" :product="product" />
+                            </div>
+                            <div class="flex justify-content-center mt-2 paginator-container">
+                                <Paginator v-model:first="first" v-model:rows="rows" :totalRecords="total"
+                                    :rowsPerPageOptions="[12, 24, 36, 48, 60]" @page="changePage($event)"
+                                    currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} productos"
+                                    template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink RowsPerPageDropdown" />
+                            </div>
+                        </template>
                     </div>
                 </div>
                 <div class="order">
                     <h3 class="mt-0 px-5 py-2">Resumen Orden</h3>
                 </div>
-            </div>
-            <div class="loading-bar" v-else>
-                <img src="/logo-alogar.avif" alt="logo Alogar" class="loading-logo" />
-                <ProgressBar mode="indeterminate" :show-value="false" class="progress-bar" />
-                <span>Cargando productos...</span>
             </div>
         </template>
     </Card>
@@ -340,9 +341,22 @@ onMounted(() => {
 <style scoped>
 .home-card {
     width: 100%;
-    height: 100%;
+    height: calc(100dvh - 20px);
     margin: 10px;
     padding: 10px 15px;
+    overflow: hidden;
+}
+
+.home-card :deep(.p-card-body) {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.home-card :deep(.p-card-content) {
+    flex: 1;
+    min-height: 0;
 }
 
 .main-container {
@@ -350,6 +364,9 @@ onMounted(() => {
     grid-template-areas:
         "header header header"
         "productos productos orden";
+    grid-template-rows: auto 1fr;
+    height: 100%;
+    min-height: 0;
 }
 
 .header {
@@ -399,6 +416,7 @@ onMounted(() => {
     flex-direction: column;
     width: 100%;
     height: 100%;
+    min-height: 0;
     padding-right: 10px;
 }
 
@@ -406,7 +424,7 @@ onMounted(() => {
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: 100%;
+    flex-shrink: 0;
 }
 
 .filters {
@@ -471,8 +489,16 @@ onMounted(() => {
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: 100%;
     flex: 1;
+    min-height: 0;
+}
+
+.products-list>h3 {
+    flex-shrink: 0;
+}
+
+.paginator-container {
+    flex-shrink: 0;
 }
 
 .list {
@@ -481,7 +507,8 @@ onMounted(() => {
     gap: 15px;
     width: 100%;
     flex: 1;
-    height: 100px;
+    min-height: 0;
+    overflow-y: auto;
 }
 
 .loading-bar {
@@ -494,11 +521,6 @@ onMounted(() => {
     font-size: 15px;
     font-weight: bold;
     font-style: italic;
-}
-
-.loading-logo {
-    width: 200px;
-    height: 50px;
 }
 
 .progress-bar {

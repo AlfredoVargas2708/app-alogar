@@ -18,7 +18,8 @@ import { RouterView } from 'vue-router';
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100dvh;
+  height: 100dvh;
+  overflow: hidden;
   background-color: rgba(24, 76, 71, 0.8);
 }
 </style>
