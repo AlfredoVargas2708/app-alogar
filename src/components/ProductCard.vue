@@ -1,81 +1,66 @@
 <script setup lang="ts">
 import type { Product } from '@/interfaces/products.interface';
-import Card from 'primevue/card';
+import { ShoppingCart } from '@/shared/icons';
+import type Button from 'primevue/button';
 import Tag from 'primevue/tag';
 
 const props = defineProps<{ product: Product }>()
 </script>
 
 <template>
-    <Card>
-        <template #content>
-            <div class="product-body">
-                <div class="product-image">
-                    <span class="product-status" :class="{ unavailable: !props.product.available }">
-                        {{ props.product.available ? 'Disponible' : 'Agotado' }}
-                    </span>
-                    <span class="product-offer" :class="{ 'with-offer': props.product.offer_price }">
-                        En Oferta
-                    </span>
-                    <img v-if="props.product.imageUrl" :src="props.product.imageUrl" :alt="props.product.title" />
-                </div>
-                <div class="product-content">
-                    <div class="product-title">
-                        <h4>{{ props.product.title }}</h4>
-                        <div class="prices">
-                            <p class="product-price" :class="{ 'with-offer': props.product.offer_price }">{{
-                                Number(props.product.price).toLocaleString('es-CL', {
-                                    style: 'currency',
-                                    currency: 'CLP'
-                                }) }}</p>
-                            <p class="product-price" v-if="props.product.offer_price">{{
-                                Number(props.product.offer_price).toLocaleString('es-CL', {
-                                    style: 'currency',
-                                    currency: 'CLP'
-                                }) }}</p>
-                        </div>
-                    </div>
-                    <div class="product-types">
-                        <h4>Categorías</h4>
-                        <div class="types">
-                            <Tag v-for="type in props.product.productType" :key="type" class="product-type">{{ type }}
-                            </Tag>
-                        </div>
-                    </div>
+    <div class="product-body">
+        <div class="product-image">
+            <span class="product-status" :class="{ unavailable: !props.product.available }">
+                {{ props.product.available ? 'Disponible' : 'Agotado' }}
+            </span>
+            <span class="product-offer" :class="{ 'with-offer': props.product.offer_price }">
+                En Oferta
+            </span>
+            <img v-if="props.product.imageUrl" :src="props.product.imageUrl" :alt="props.product.title" />
+        </div>
+        <div class="product-content">
+            <div class="product-title">
+                <h4>{{ props.product.title }}</h4>
+                <div class="prices">
+                    <p class="product-price" :class="{ 'with-offer': props.product.offer_price }">{{
+                        Number(props.product.price).toLocaleString('es-CL', {
+                            style: 'currency',
+                            currency: 'CLP'
+                        }) }}</p>
+                    <p class="product-price" v-if="props.product.offer_price">{{
+                        Number(props.product.offer_price).toLocaleString('es-CL', {
+                            style: 'currency',
+                            currency: 'CLP'
+                        }) }}</p>
                 </div>
             </div>
-        </template>
-    </Card>
+            <div class="product-types">
+                <h4>Categorías</h4>
+                <div class="types">
+                    <Tag v-for="type in props.product.productType" :key="type" class="product-type">{{ type }}
+                    </Tag>
+                </div>
+            </div>
+        </div>
+        <div class="product-footer">
+            <Button class="button" :disabled="!props.product.available">
+                <ShoppingCart :size="18" />
+                Agregar al carrito
+            </Button>
+        </div>
+    </div>
 </template>
 
 <style scoped>
-.p-card {
-    border: 1px solid var(--color-principal);
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-}
-
-:deep(.p-card) {
-    height: 100%;
-}
-
-:deep(.p-card-body) {
-    height: 100%;
-    padding: 0;
-}
-
-:deep(.p-card-content) {
-    height: 100%;
-}
-
 .product-body {
     display: grid;
-    grid-template-areas: "imagen contenido";
+    grid-template-areas: "imagen contenido"
+        "footer footer";
     grid-template-columns: 200px 1fr;
-    height: 175px;
-    gap: 15px;
+    height: 190px;
+    column-gap: 10px;
+    border: 1px solid var(--color-principal);
+    border-radius: 10px;
 }
 
 .product-image {
@@ -118,7 +103,7 @@ const props = defineProps<{ product: Product }>()
         width: 100%;
         height: 100%;
         object-fit: cover;
-        border-radius: 10px 0px 0px 10px;
+        border-radius: 10px 0px 0px 0px;
     }
 }
 
@@ -185,6 +170,19 @@ const props = defineProps<{ product: Product }>()
             color: #FFFFFF;
             text-transform: capitalize;
         }
+    }
+}
+
+.product-footer {
+    grid-area: footer;
+
+    .button {
+        border-radius: 0px 0px 10px 10px;
+        width: 100%;
+        border: 1px solid var(--color-principal);
+        border-width: 1px 0px 0px 0px;
+        background-color: var(--color-principal);
+        height: 40px;
     }
 }
 </style>

@@ -7,5 +7,6 @@ import Lock from '@primeicons/vue/lock'
 import Eye from '@primeicons/vue/eye'
 import EyeSlash from '@primeicons/vue/eye-slash'
 import Spinner from '@primeicons/vue/spinner'
+import ShoppingCart from '@primeicons/vue/shopping-cart'
 
-export { SignOut, Search, Filter, Dollar, UserIcon, Lock, Eye, EyeSlash, Spinner }
+export { SignOut, Search, Filter, Dollar, UserIcon, Lock, Eye, EyeSlash, Spinner, ShoppingCart }
