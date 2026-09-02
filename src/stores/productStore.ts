@@ -93,7 +93,6 @@ export const useProductStore = defineStore('products', () => {
 
   function addOrdenProduct(product: Product) {
     ordenProducts.value.push(product)
-    console.log(ordenProducts)
   }
 
   return {

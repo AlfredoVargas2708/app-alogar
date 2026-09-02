@@ -57,7 +57,7 @@ const rows = defineModel<number>('rows', { required: true });
 
 .list {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(550px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
     grid-auto-rows: min-content;
     align-content: start;
     gap: 15px;
