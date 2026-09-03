@@ -25,8 +25,12 @@ const rows = defineModel<number>('rows', { required: true });
             <span>Cargando productos...</span>
         </div>
         <template v-else>
-            <div class="list">
+            <div v-if="products.length > 0" class="list">
                 <ProductCard v-for="product in products" :key="product.id" :product="product" />
+            </div>
+            <div v-else class="empty-state">
+                <h4>No se encontraron productos</h4>
+                <p>Prueba cambiando o limpiando los filtros de búsqueda.</p>
             </div>
             <div class="flex justify-content-center mt-2 paginator-container">
                 <Paginator v-model:first="first" v-model:rows="rows" :totalRecords="total"
@@ -65,6 +69,33 @@ const rows = defineModel<number>('rows', { required: true });
     flex: 1;
     min-height: 0;
     overflow-y: auto;
+}
+
+.empty-state {
+    flex: 1;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 2rem;
+    text-align: center;
+    color: color-mix(in srgb, var(--color-principal) 70%, white);
+}
+
+.empty-state h4,
+.empty-state p {
+    margin: 0;
+}
+
+.empty-state h4 {
+    color: var(--color-principal);
+    font-size: 18px;
+}
+
+.empty-state p {
+    font-size: 14px;
 }
 
 .loading-bar {
