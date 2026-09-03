@@ -108,6 +108,10 @@ export const useProductStore = defineStore('products', () => {
     }
   }
 
+  function deleteOrden() {
+    ordenProducts.value = []
+  }
+
   return {
     products,
     isLoading,
@@ -124,5 +128,6 @@ export const useProductStore = defineStore('products', () => {
     addOrdenProduct,
     deleteOrdenProduct,
     updateOrdenProduct,
+    deleteOrden,
   }
 })

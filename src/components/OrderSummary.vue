@@ -9,11 +9,12 @@ import Button from 'primevue/button';
 import { CreditCard, MoneyBill, Times } from '@/shared/icons.ts';
 
 const productsStore = useProductStore();
+const { deleteOrden } = productsStore
 const { ordenProducts } = storeToRefs(productsStore)
 
 const totalPagar = computed(() => {
     return ordenProducts.value.reduce((acc: number, product: Product) => {
-        return acc + ((product.cantidad ?? 0) * (product.offer_price ?? product.price))
+        return acc + (product.isWeight ? (((product.weight ?? 0) / (product.grams ?? 0)) * (product.offer_price ?? product.price)) : (product.cantidad ?? 0) * (product.offer_price ?? product.price))
     }, 0);
 })
 </script>
@@ -30,7 +31,7 @@ const totalPagar = computed(() => {
             <p class="total px-5">Total a Pagar: <span>{{ formatCurrency(totalPagar) }}</span></p>
         </div>
         <div class="actions">
-            <Button severity="danger" :disabled="ordenProducts.length === 0">
+            <Button severity="danger" :disabled="ordenProducts.length === 0" @click="deleteOrden">
                 <Times :size="32" />
                 Borrar Orden
             </Button>
