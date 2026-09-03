@@ -122,7 +122,7 @@ onMounted(() => {
     grid-template-areas:
         "header header"
         "productos orden";
-    grid-template-columns: 1fr 700px;
+    grid-template-columns: 1fr 600px;
     grid-template-rows: auto 1fr;
     height: 100%;
     min-height: 0;

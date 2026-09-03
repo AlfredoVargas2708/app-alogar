@@ -51,21 +51,30 @@ const totalPagar = computed(() => {
     grid-area: orden;
     width: 100%;
     min-width: 0;
+    min-height: 0;
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    overflow: hidden;
     border-left: 1px dotted var(--color-principal);
     padding-left: 10px;
 }
 
 .summary {
+    grid-row: 2;
+    min-height: 0;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    overflow: hidden;
 }
 
 .products {
+    flex: 1;
+    min-height: 0;
     display: flex;
     flex-direction: column;
     gap: 15px;
-    height: calc(100dvh - 500px);
+    height: auto;
     overflow: auto;
 }
 
@@ -87,6 +96,8 @@ const totalPagar = computed(() => {
 }
 
 .actions {
+    grid-row: 3;
+    padding-top: 12px;
     display: flex;
     align-items: center;
     justify-content: space-between;

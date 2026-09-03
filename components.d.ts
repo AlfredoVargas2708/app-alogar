@@ -12,22 +12,14 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AppHeader: typeof import('./src/components/AppHeader.vue')['default']
-    AutoComplete: typeof import('primevue/autocomplete')['default']
     Button: typeof import('primevue/button')['default']
     Card: typeof import('primevue/card')['default']
-    Checkbox: typeof import('primevue/checkbox')['default']
-    FloatLabel: typeof import('primevue/floatlabel')['default']
-    InputGroup: typeof import('primevue/inputgroup')['default']
-    InputGroupAddon: typeof import('primevue/inputgroupaddon')['default']
-    InputNumber: typeof import('primevue/inputnumber')['default']
-    InputText: typeof import('primevue/inputtext')['default']
     OrdenCard: typeof import('./src/components/OrdenCard.vue')['default']
     OrderSummary: typeof import('./src/components/OrderSummary.vue')['default']
-    Paginator: typeof import('primevue/paginator')['default']
     ProductCard: typeof import('./src/components/ProductCard.vue')['default']
     ProductFilters: typeof import('./src/components/ProductFilters.vue')['default']
     ProductListing: typeof import('./src/components/ProductListing.vue')['default']
-    ProgressBar: typeof import('primevue/progressbar')['default']
+    RadioButton: typeof import('primevue/radiobutton')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
   }
