@@ -27,6 +27,8 @@ export const useProductStore = defineStore('products', () => {
     limit: number,
     nombre?: string | null,
     available?: boolean | null,
+    minPrice?: number | null,
+    maxPrice?: number | null,
   ) {
     isLoading.value = true
     error.value = null
@@ -37,6 +39,8 @@ export const useProductStore = defineStore('products', () => {
           limite: limit,
           ...(nombre ? { busqueda: encodeURIComponent(nombre ?? '') } : {}),
           ...(available !== undefined && available !== null ? { disponible: available } : {}),
+          ...(minPrice !== undefined && minPrice !== null ? { precioMinimo: minPrice } : {}),
+          ...(maxPrice !== undefined && maxPrice !== null ? { precioMaximo: maxPrice } : {}),
         },
       })
       products.value = response.data.productos

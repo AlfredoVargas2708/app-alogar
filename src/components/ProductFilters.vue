@@ -6,7 +6,7 @@ import FloatLabel from 'primevue/floatlabel';
 import AutoComplete from 'primevue/autocomplete';
 import Select from 'primevue/select';
 import Checkbox from 'primevue/checkbox';
-import InputNumber from 'primevue/inputnumber';
+import InputNumber, { type InputNumberInputEvent } from 'primevue/inputnumber';
 import type { AutoCompleteOptionSelectEvent } from 'primevue/autocomplete';
 import { debounce } from 'lodash-es';
 import { Dollar, Filter, Search } from '@/shared/icons';
@@ -24,6 +24,8 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     'select-product': [name: string];
+    'min-price': [precio: number | null];
+    'max-price': [precio: number | null];
     clear: [];
 }>();
 
@@ -146,12 +148,39 @@ const handleFocusOut = () => {
     }, 10)
 }
 
+function searchByPrice() {
+    emit('min-price', minPrice.value);
+    emit('max-price', maxPrice.value);
+}
+
+const searchByPriceDebounced = debounce(searchByPrice, 500);
+
+function normalizePrice(value: InputNumberInputEvent['value']): number | null {
+    if (value === undefined || value === null || value === '') {
+        return null;
+    }
+
+    const numericValue = Number(value);
+    return Number.isFinite(numericValue) ? numericValue : null;
+}
+
+function onMinPriceInput(event: InputNumberInputEvent) {
+    minPrice.value = normalizePrice(event.value);
+    searchByPriceDebounced();
+}
+
+function onMaxPriceInput(event: InputNumberInputEvent) {
+    maxPrice.value = normalizePrice(event.value);
+    searchByPriceDebounced();
+}
+
 onMounted(() => {
     keepFocus()
     window.addEventListener('focusout', handleFocusOut)
 })
 
 onUnmounted(() => {
+    searchByPriceDebounced.cancel();
     window.removeEventListener('focusout', handleFocusOut)
 })
 </script>
@@ -222,7 +251,7 @@ onUnmounted(() => {
                     </InputGroupAddon>
                     <FloatLabel>
                         <InputNumber input-id="min-price" v-model="minPrice" mode="currency" currency="CLP"
-                            locale="es-CL">
+                            locale="es-CL" @input="onMinPriceInput">
                         </InputNumber>
                         <label for="min-price">Precio Mínimo:</label>
                     </FloatLabel>
@@ -234,7 +263,7 @@ onUnmounted(() => {
                         </InputGroupAddon>
                         <FloatLabel>
                             <InputNumber input-id="max-price" mode="currency" v-model="maxPrice" currency="CLP"
-                                locale="es-CL" :invalid="precioLimite" />
+                                locale="es-CL" :invalid="precioLimite" @input="onMaxPriceInput" />
                             <label for="max-price">{{ maxPricePlaceholder }}</label>
                         </FloatLabel>
                     </InputGroup>

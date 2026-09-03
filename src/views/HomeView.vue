@@ -21,6 +21,8 @@ const availableOptions = ref<AvailableFilterOption[]>([]);
 const categoriesOptions = ref<string[]>([]);
 const maxPriceLimit = ref<number>(0);
 const maxPricePlaceholder = ref<string>('');
+const minPrice = ref<number | null>(null);
+const maxPrice = ref<number | null>(null);
 const first = ref(0);
 const rows = ref(12);
 
@@ -32,7 +34,7 @@ function logout() {
 }
 
 function changePage(event: PageState) {
-    void fetchProducts(event.page + 1, event.rows);
+    void fetchProducts(event.page + 1, event.rows, null, null, minPrice.value, maxPrice.value);
 }
 
 watch(pagina, (currentPage) => {
@@ -42,16 +44,30 @@ watch(pagina, (currentPage) => {
 watch(availableSelected, (available) => {
     // Solo se envía el filtro cuando hay una única opción seleccionada (disponible o agotado)
     const disponible = available.length === 1 ? available[0]!.value : undefined;
-    void fetchProducts(pagina.value, rows.value, null, disponible)
+    void fetchProducts(pagina.value, rows.value, null, disponible, minPrice.value, maxPrice.value)
 })
 
 function onProductSelected(name: string) {
     first.value = 0;
-    void fetchProducts(1, rows.value, name);
+    void fetchProducts(1, rows.value, name, null, minPrice.value, maxPrice.value);
+}
+
+function onMinPriceChange(value: number | null) {
+    minPrice.value = value;
+    first.value = 0;
+    void fetchProducts(1, rows.value, null, null, value, maxPrice.value);
+}
+
+function onMaxPriceChange(value: number | null) {
+    maxPrice.value = value;
+    first.value = 0;
+    void fetchProducts(1, rows.value, null, null, minPrice.value, value);
 }
 
 function onFiltersClear() {
-    void fetchProducts(pagina.value, rows.value);
+    minPrice.value = null;
+    maxPrice.value = null;
+    void fetchProducts(1, rows.value);
 }
 
 async function loadFilterOptions() {
@@ -86,7 +102,7 @@ onMounted(() => {
                     <ProductFilters v-model:available-selected="availableSelected" :available-options="availableOptions"
                         :categories-options="categoriesOptions" :max-price-limit="maxPriceLimit"
                         :max-price-placeholder="maxPricePlaceholder" @select-product="onProductSelected"
-                        @clear="onFiltersClear" />
+                        @min-price="onMinPriceChange" @max-price="onMaxPriceChange" @clear="onFiltersClear" />
                     <ProductListing v-model:first="first" v-model:rows="rows" :products="products"
                         :is-loading="isLoading" :total="total" @page="changePage" />
                 </div>
