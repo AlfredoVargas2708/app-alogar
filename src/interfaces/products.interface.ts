@@ -16,6 +16,9 @@ export interface Product {
   offer_price: number | null
   productType: string[]
   cantidad: number | null
+  isWeight: boolean | null
+  weight: number | null
+  grams: number | null
 }
 
 export interface AvailableResponse {

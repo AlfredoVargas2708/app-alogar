@@ -92,11 +92,20 @@ export const useProductStore = defineStore('products', () => {
   }
 
   function addOrdenProduct(product: Product) {
-    ordenProducts.value.push({ ...product, cantidad: 1 })
+    ordenProducts.value.push({ ...product, cantidad: 1, isWeight: false })
   }
 
   function deleteOrdenProduct(product: Product) {
     ordenProducts.value = ordenProducts.value.filter((prod) => prod.id !== product.id)
+  }
+
+  function updateOrdenProduct(productId: number, updates: Partial<Product>) {
+    const index = ordenProducts.value.findIndex((p) => p.id === productId)
+    const product = ordenProducts.value[index]
+
+    if (product) {
+      ordenProducts.value[index] = { ...product, ...updates }
+    }
   }
 
   return {
@@ -114,5 +123,6 @@ export const useProductStore = defineStore('products', () => {
     ordenProducts,
     addOrdenProduct,
     deleteOrdenProduct,
+    updateOrdenProduct,
   }
 })

@@ -105,7 +105,7 @@ const totalPagar = computed(() => {
 
     .p-button {
         width: 100%;
-        font-size: 24px;
+        font-size: 18px;
 
         &:last-child {
             background-color: var(--color-principal);
