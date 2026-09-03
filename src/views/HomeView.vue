@@ -23,6 +23,7 @@ const maxPriceLimit = ref<number>(0);
 const maxPricePlaceholder = ref<string>('');
 const minPrice = ref<number | null>(null);
 const maxPrice = ref<number | null>(null);
+const categoriesSelected = ref<string[]>([]);
 const first = ref(0);
 const rows = ref(12);
 
@@ -34,7 +35,7 @@ function logout() {
 }
 
 function changePage(event: PageState) {
-    void fetchProducts(event.page + 1, event.rows, null, null, minPrice.value, maxPrice.value);
+    void fetchProducts(event.page + 1, event.rows, null, null, minPrice.value, maxPrice.value, categoriesSelected.value);
 }
 
 watch(pagina, (currentPage) => {
@@ -44,29 +45,36 @@ watch(pagina, (currentPage) => {
 watch(availableSelected, (available) => {
     // Solo se envía el filtro cuando hay una única opción seleccionada (disponible o agotado)
     const disponible = available.length === 1 ? available[0]!.value : undefined;
-    void fetchProducts(pagina.value, rows.value, null, disponible, minPrice.value, maxPrice.value)
+    void fetchProducts(pagina.value, rows.value, null, disponible, minPrice.value, maxPrice.value, categoriesSelected.value)
 })
 
 function onProductSelected(name: string) {
     first.value = 0;
-    void fetchProducts(1, rows.value, name, null, minPrice.value, maxPrice.value);
+    void fetchProducts(1, rows.value, name, null, minPrice.value, maxPrice.value, categoriesSelected.value);
 }
 
 function onMinPriceChange(value: number | null) {
     minPrice.value = value;
     first.value = 0;
-    void fetchProducts(1, rows.value, null, null, value, maxPrice.value);
+    void fetchProducts(1, rows.value, null, null, value, maxPrice.value, categoriesSelected.value);
 }
 
 function onMaxPriceChange(value: number | null) {
     maxPrice.value = value;
     first.value = 0;
-    void fetchProducts(1, rows.value, null, null, minPrice.value, value);
+    void fetchProducts(1, rows.value, null, null, minPrice.value, value, categoriesSelected.value);
+}
+
+function onCategoriesChange(categories: string[]) {
+    categoriesSelected.value = categories;
+    first.value = 0;
+    void fetchProducts(1, rows.value, null, null, minPrice.value, maxPrice.value, categories);
 }
 
 function onFiltersClear() {
     minPrice.value = null;
     maxPrice.value = null;
+    categoriesSelected.value = [];
     void fetchProducts(1, rows.value);
 }
 
@@ -102,7 +110,8 @@ onMounted(() => {
                     <ProductFilters v-model:available-selected="availableSelected" :available-options="availableOptions"
                         :categories-options="categoriesOptions" :max-price-limit="maxPriceLimit"
                         :max-price-placeholder="maxPricePlaceholder" @select-product="onProductSelected"
-                        @min-price="onMinPriceChange" @max-price="onMaxPriceChange" @clear="onFiltersClear" />
+                        @min-price="onMinPriceChange" @max-price="onMaxPriceChange" @categories="onCategoriesChange"
+                        @clear="onFiltersClear" />
                     <ProductListing v-model:first="first" v-model:rows="rows" :products="products"
                         :is-loading="isLoading" :total="total" @page="changePage" />
                 </div>

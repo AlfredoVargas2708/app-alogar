@@ -26,6 +26,7 @@ const emit = defineEmits<{
     'select-product': [name: string];
     'min-price': [precio: number | null];
     'max-price': [precio: number | null];
+    categories: [categorias: string[]];
     clear: [];
 }>();
 
@@ -113,6 +114,10 @@ const indeterminate = computed(() => categoriesSelected.value.length > 0 && !all
 const onToggleAll = (checked: unknown) => {
     categoriesSelected.value = checked ? props.categoriesOptions.map((c) => c) : [];
 };
+
+watch(categoriesSelected, (categories) => {
+    emit('categories', [...categories]);
+});
 
 const precioLimite = computed(() => {
     return (maxPrice.value ?? 0) > props.maxPriceLimit
