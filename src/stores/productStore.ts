@@ -102,6 +102,10 @@ export const useProductStore = defineStore('products', () => {
     }
   }
 
+  function deleteOrdenProduct(product: Product) {
+    ordenProducts.value = ordenProducts.value.filter((prod) => prod.id !== product.id)
+  }
+
   return {
     products,
     isLoading,
@@ -117,5 +121,6 @@ export const useProductStore = defineStore('products', () => {
     ordenProducts,
     addOrdenProduct,
     updateOrdenProductCantidad,
+    deleteOrdenProduct,
   }
 })

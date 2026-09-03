@@ -2,10 +2,13 @@
 import type { Product } from '@/interfaces/products.interface';
 import { formatCurrency } from '@/shared/currency';
 import { Minus, Plus, Trash } from '@/shared/icons';
+import { useProductStore } from '@/stores/productStore';
 import type Button from 'primevue/button';
 import InputNumber from 'primevue/inputnumber';
 import { computed } from 'vue';
 
+const productStore = useProductStore();
+const { deleteOrdenProduct } = productStore;
 
 const props = defineProps<{ product: Product }>()
 
@@ -41,7 +44,7 @@ const subtotal = computed(() => {
                     <Minus />
                 </template>
             </InputNumber>
-            <Button class="trash-button">
+            <Button class="trash-button" @click="deleteOrdenProduct(props.product)">
                 <Trash :size="16" />
             </Button>
         </div>
