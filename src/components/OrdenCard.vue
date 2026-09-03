@@ -60,7 +60,7 @@ const subtotal = computed(() => {
     display: grid;
     grid-template-areas: "imagen titulo titulo titulo"
         "imagen descripcion acciones acciones";
-    grid-template-columns: 200px 1fr 150px;
+    grid-template-columns: 90px 1fr 150px;
     grid-template-rows: auto auto;
     column-gap: 10px;
     row-gap: 4px;
@@ -76,7 +76,7 @@ const subtotal = computed(() => {
     img {
         width: 100%;
         height: 100%;
-        object-fit: cover;
+        object-fit: contain;
         border-radius: 10px 0px 0px 10px;
     }
 }

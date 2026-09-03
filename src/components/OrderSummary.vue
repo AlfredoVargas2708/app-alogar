@@ -5,6 +5,8 @@ import OrdenCard from './OrdenCard.vue';
 import { computed } from 'vue';
 import { formatCurrency } from '@/shared/currency.ts';
 import type { Product } from '@/interfaces/products.interface.ts';
+import Button from 'primevue/button';
+import { CreditCard, MoneyBill, Times } from '@/shared/icons.ts';
 
 const productsStore = useProductStore();
 const { ordenProducts } = storeToRefs(productsStore)
@@ -26,6 +28,20 @@ const totalPagar = computed(() => {
             </div>
             <hr class="separador" />
             <p class="total px-5">Total a Pagar: <span>{{ formatCurrency(totalPagar) }}</span></p>
+        </div>
+        <div class="actions">
+            <Button severity="danger" :disabled="ordenProducts.length === 0">
+                <Times :size="32" />
+                Borrar Orden
+            </Button>
+            <Button severity="info" :disabled="ordenProducts.length === 0">
+                <CreditCard :size="32" />
+                Tarjeta
+            </Button>
+            <Button :disabled="ordenProducts.length === 0">
+                <MoneyBill :size="32" />
+                Efectivo
+            </Button>
         </div>
     </div>
 </template>
@@ -68,5 +84,22 @@ const totalPagar = computed(() => {
     border: none;
     border-top: 3px dotted var(--color-principal);
     background-color: transparent;
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+
+    .p-button {
+        width: 100%;
+        font-size: 24px;
+
+        &:last-child {
+            background-color: var(--color-principal);
+            border: none;
+        }
+    }
 }
 </style>

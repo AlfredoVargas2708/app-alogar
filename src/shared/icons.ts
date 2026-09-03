@@ -11,6 +11,9 @@ import ShoppingCart from '@primeicons/vue/shopping-cart'
 import Minus from '@primeicons/vue/minus'
 import Plus from '@primeicons/vue/plus'
 import Trash from '@primeicons/vue/trash'
+import Times from '@primeicons/vue/times'
+import MoneyBill from '@primeicons/vue/money-bill'
+import CreditCard from '@primeicons/vue/credit-card'
 
 export {
   SignOut,
@@ -26,4 +29,7 @@ export {
   Minus,
   Plus,
   Trash,
+  Times,
+  MoneyBill,
+  CreditCard,
 }

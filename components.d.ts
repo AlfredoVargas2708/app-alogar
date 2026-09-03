@@ -14,6 +14,7 @@ declare module 'vue' {
     AppHeader: typeof import('./src/components/AppHeader.vue')['default']
     AutoComplete: typeof import('primevue/autocomplete')['default']
     Button: typeof import('primevue/button')['default']
+    Card: typeof import('primevue/card')['default']
     Checkbox: typeof import('primevue/checkbox')['default']
     FloatLabel: typeof import('primevue/floatlabel')['default']
     InputGroup: typeof import('primevue/inputgroup')['default']

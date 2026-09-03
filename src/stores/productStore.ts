@@ -95,13 +95,6 @@ export const useProductStore = defineStore('products', () => {
     ordenProducts.value.push({ ...product, cantidad: 1 })
   }
 
-  function updateOrdenProductCantidad(id: number, cantidad: number | null) {
-    const product = ordenProducts.value.find((p) => p.id === id)
-    if (product) {
-      product.cantidad = cantidad
-    }
-  }
-
   function deleteOrdenProduct(product: Product) {
     ordenProducts.value = ordenProducts.value.filter((prod) => prod.id !== product.id)
   }
@@ -120,7 +113,6 @@ export const useProductStore = defineStore('products', () => {
     buscadorNombres,
     ordenProducts,
     addOrdenProduct,
-    updateOrdenProductCantidad,
     deleteOrdenProduct,
   }
 })
