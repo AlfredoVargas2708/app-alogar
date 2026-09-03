@@ -36,16 +36,16 @@ const subtotal = computed(() => {
         </div>
         <div class="product-actions">
             <InputNumber v-model="props.product.cantidad" showButtons buttonLayout="horizontal" inputId="vertical"
-                :inputStyle="{ width: '3rem' }">
+                :inputStyle="{ width: '3rem', 'text-align': 'center' }">
                 <template #incrementicon>
-                    <Plus />
+                    <Plus :size="20" />
                 </template>
                 <template #decrementicon>
-                    <Minus />
+                    <Minus :size="20" />
                 </template>
             </InputNumber>
             <Button class="trash-button" @click="deleteOrdenProduct(props.product)">
-                <Trash :size="16" />
+                <Trash :size="24" />
             </Button>
         </div>
     </div>
@@ -117,5 +117,13 @@ const subtotal = computed(() => {
     justify-content: flex-end;
     gap: 10px;
     width: 100%;
+
+    .trash-button.p-button {
+        background-color: red;
+        border: none;
+        width: 50px;
+        height: 35px;
+        padding: 0px 10px;
+    }
 }
 </style>
