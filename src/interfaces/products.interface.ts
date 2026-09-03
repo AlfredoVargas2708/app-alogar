@@ -15,6 +15,7 @@ export interface Product {
   source: string
   offer_price: number | null
   productType: string[]
+  cantidad: number | null
 }
 
 export interface AvailableResponse {

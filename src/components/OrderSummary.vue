@@ -22,6 +22,8 @@ const { ordenProducts } = storeToRefs(productsStore)
 <style scoped>
 .order {
     grid-area: orden;
+    width: 100%;
+    min-width: 0;
     border-left: 1px dotted var(--color-principal);
     padding-left: 10px;
 }
@@ -36,7 +38,7 @@ const { ordenProducts } = storeToRefs(productsStore)
     display: flex;
     flex-direction: column;
     gap: 15px;
-    height: 180px;
+    height: 300px;
     overflow: auto;
 }
 </style>

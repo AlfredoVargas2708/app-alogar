@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Product } from '@/interfaces/products.interface';
+import { formatCurrency } from '@/shared/currency';
 import { ShoppingCart } from '@/shared/icons';
 import { useProductStore } from '@/stores/productStore';
 import { storeToRefs } from 'pinia';
@@ -26,7 +27,7 @@ function addProduct() {
             <span class="product-status" :class="{ unavailable: !props.product.available }">
                 {{ props.product.available ? 'Disponible' : 'Agotado' }}
             </span>
-            <span class="product-offer" :class="{ 'with-offer': props.product.offer_price }">
+            <span v-if="props.product.offer_price" class="product-offer">
                 En Oferta
             </span>
             <img v-if="props.product.imageUrl" :src="props.product.imageUrl" :alt="props.product.title" />
@@ -36,15 +37,9 @@ function addProduct() {
                 <h4>{{ props.product.title }}</h4>
                 <div class="prices">
                     <p class="product-price" :class="{ 'with-offer': props.product.offer_price }">{{
-                        Number(props.product.price).toLocaleString('es-CL', {
-                            style: 'currency',
-                            currency: 'CLP'
-                        }) }}</p>
+                        formatCurrency(props.product.price) }}</p>
                     <p class="product-price" v-if="props.product.offer_price">{{
-                        Number(props.product.offer_price).toLocaleString('es-CL', {
-                            style: 'currency',
-                            currency: 'CLP'
-                        }) }}</p>
+                        formatCurrency(props.product.offer_price) }}</p>
                 </div>
             </div>
             <div class="product-types">

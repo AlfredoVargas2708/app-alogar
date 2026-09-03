@@ -120,8 +120,9 @@ onMounted(() => {
 .main-container {
     display: grid;
     grid-template-areas:
-        "header header header header"
-        "productos productos productos orden";
+        "header header"
+        "productos orden";
+    grid-template-columns: 1fr 700px;
     grid-template-rows: auto 1fr;
     height: 100%;
     min-height: 0;
@@ -134,6 +135,7 @@ onMounted(() => {
     width: 100%;
     height: 100%;
     min-height: 0;
+    min-width: 0;
     padding-right: 10px;
 }
 </style>
