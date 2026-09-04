@@ -15,6 +15,7 @@ import Times from '@primeicons/vue/times'
 import MoneyBill from '@primeicons/vue/money-bill'
 import CreditCard from '@primeicons/vue/credit-card'
 import Check from '@primeicons/vue/check'
+import CartPlus from '@primeicons/vue/cart-plus'
 
 export {
   SignOut,
@@ -34,4 +35,5 @@ export {
   MoneyBill,
   CreditCard,
   Check,
+  CartPlus,
 }

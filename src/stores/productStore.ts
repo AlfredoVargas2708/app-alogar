@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import axios from 'axios'
 import api from '@/services/api'
-import type { AvailableResponse, Product, ProductsResponse } from '@/interfaces/products.interface'
+import type { Product, ProductsResponse } from '@/interfaces/products.interface'
 
 export const useProductStore = defineStore('products', () => {
   // Estado

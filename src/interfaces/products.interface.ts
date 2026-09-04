@@ -7,6 +7,7 @@ export interface ProductsResponse {
 
 export interface Product {
   id: number
+  shopify_id: number
   title: string
   handle: string
   price: number
@@ -19,11 +20,6 @@ export interface Product {
   isWeight: boolean | null
   weight: number | null
   grams: number | null
-}
-
-export interface AvailableResponse {
-  available: boolean
-  count: number
 }
 
 export interface AvailableFilterOption {

@@ -6,10 +6,11 @@ import { computed, ref, watch } from 'vue';
 import { formatCurrency } from '@/shared/currency.ts';
 import type { Product } from '@/interfaces/products.interface.ts';
 import Button from 'primevue/button';
-import { CreditCard, MoneyBill, Times } from '@/shared/icons.ts';
+import { CartPlus, CreditCard, MoneyBill, Spinner, Times } from '@/shared/icons.ts';
 import InputNumber from 'primevue/inputnumber';
 import Dialog from 'primevue/dialog';
 import CardModal from './CardModal.vue';
+import type { Sale } from '@/interfaces/sale.interface.ts';
 
 const productsStore = useProductStore();
 const { deleteOrden } = productsStore
@@ -17,6 +18,14 @@ const { ordenProducts } = storeToRefs(productsStore)
 const saleType = ref<string>("");
 const totalRecibido = ref<number | null>(null);
 const cardModalVisible = ref<boolean>(false);
+
+const emit = defineEmits<{
+    sale: [sale: Sale]
+}>()
+
+const props = defineProps<{
+    saleLoading: boolean
+}>();
 
 const totalPagar = computed(() => {
     return ordenProducts.value.reduce((acc: number, product: Product) => {
@@ -48,6 +57,35 @@ function restartOrden() {
 function updateShowModal(event: boolean) {
     cardModalVisible.value = event;
 }
+
+function sendSaleOrden() {
+    const sale: Sale = {
+        products: ordenProducts.value,
+        change: Math.round(vuelto.value),
+        sale_type: saleType.value,
+        total_sale: Math.round(totalPagar.value),
+        total_payed: totalRecibido.value ?? 0
+    };
+
+    emit('sale', sale)
+}
+
+const disabledSaleButton = (): boolean => {
+    if (props.saleLoading) {
+        return true
+    }
+    if (ordenProducts.value.length === 0) {
+        return true
+    }
+    if (saleType.value === '') {
+        return true
+    } else if (saleType.value === 'cash' && vuelto.value === 0) {
+        return true
+    }
+
+    return false;
+}
+
 
 watch(() => ordenProducts.value.length, (productCount) => {
     if (productCount === 0) {
@@ -91,6 +129,13 @@ watch(() => ordenProducts.value.length, (productCount) => {
             <Button :disabled="ordenProducts.length === 0" @click="changeSaleType('cash')">
                 <MoneyBill :size="32" />
                 Efectivo
+            </Button>
+        </div>
+        <div class="final-action">
+            <Button severity="secondary" :disabled="disabledSaleButton()" @click="sendSaleOrden">
+                <CartPlus :size="32" v-if="!props.saleLoading" />
+                <Spinner spin :size="32" v-else />
+                Generar Venta
             </Button>
         </div>
     </div>
@@ -159,6 +204,7 @@ watch(() => ordenProducts.value.length, (productCount) => {
     align-items: center;
     justify-content: space-between;
     gap: 10px;
+    margin-bottom: 20px;
 
     .p-button {
         width: 100%;
@@ -171,39 +217,20 @@ watch(() => ordenProducts.value.length, (productCount) => {
     }
 }
 
-.cash-container {
-    display: flex;
-    flex-direction: column;
-}
-
-.cards {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 10px;
+.final-action {
+    width: 100%;
+    height: 40px;
 
     .p-button {
         width: 100%;
-        height: 70px;
-        padding: 0px;
-        background-color: transparent;
+        height: 100%;
+        font-size: 18px;
         border: 1px solid var(--color-principal);
-        box-shadow: 0 4px 14px rgba(24, 76, 71, 0.08);
-        transition: box-shadow 180ms ease, border-color 180ms ease;
-
-        &:hover {
-            border-color: color-mix(in srgb, var(--color-principal) 38%, white);
-            box-shadow: 0 7px 20px rgba(24, 76, 71, 0.13);
-            background-color: transparent;
-        }
-
-        img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
     }
+}
+
+.cash-container {
+    display: flex;
+    flex-direction: column;
 }
 </style>

@@ -10,11 +10,16 @@ import AppHeader from '@/components/AppHeader.vue';
 import ProductFilters from '@/components/ProductFilters.vue';
 import ProductListing from '@/components/ProductListing.vue';
 import OrderSummary from '@/components/OrderSummary.vue';
+import type { Sale } from '@/interfaces/sale.interface';
+import { useSaleStore } from '@/stores/saleStore';
 
 const router = useRouter()
 const productStore = useProductStore();
+const saleStore = useSaleStore();
 const { fetchProducts, categorias } = productStore;
+const { createSale } = saleStore
 const { products, isLoading, pagina, total } = storeToRefs(productStore);
+const { isLoadingSale } = storeToRefs(saleStore);
 const availableSelected = ref<AvailableFilterOption>({ label: 'Todos', value: null });
 const availableOptions = ref<AvailableFilterOption[]>([
     { label: 'Todos', value: null },
@@ -86,6 +91,10 @@ function onOfertaChange(oferta: boolean) {
     void fetchProducts(1, rows.value, null, null, minPrice.value, maxPrice.value, null, oferta);
 }
 
+function onSale(sale: Sale) {
+    void createSale(sale);
+}
+
 async function loadFilterOptions() {
     categoriesOptions.value = await categorias() ?? [];
 }
@@ -109,7 +118,7 @@ onMounted(() => {
                     <ProductListing v-model:first="first" v-model:rows="rows" :products="products"
                         :is-loading="isLoading" :total="total" @page="changePage" />
                 </div>
-                <OrderSummary />
+                <OrderSummary @sale="onSale" :sale-loading="isLoadingSale" />
             </div>
         </template>
     </Card>
