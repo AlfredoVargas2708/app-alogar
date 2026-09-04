@@ -28,7 +28,7 @@ const emit = defineEmits<{
     clear: [];
 }>();
 
-const availableSelected = defineModel<AvailableFilterOption[]>('availableSelected', { default: () => [] });
+const availableSelected = defineModel<AvailableFilterOption | undefined>('availableSelected');
 
 const { buscadorNombres } = useProductStore();
 
@@ -45,17 +45,13 @@ const isIndeterminate = ref(true);
 let skipNextNameSearch = false;
 let nameSearchRequest = 0;
 
-const isItemSelected = (available: AvailableFilterOption) => availableSelected.value.includes(available);
+
 const isCategorySelected = (category: string) => categoriesSelected.value.includes(category);
 
 const onCheck = () => {
     isIndeterminate.value = false;
     emit('oferta', checked.value)
 };
-
-function restartAvailable() {
-    availableSelected.value = [];
-}
 
 function restartCategories() {
     categoriesSelected.value = [];
@@ -224,30 +220,8 @@ onUnmounted(() => {
                     <InputGroupAddon>
                         <Filter />
                     </InputGroupAddon>
-                    <Select placeholder="Disponibilidad del Producto" multiple v-model="availableSelected"
-                        :options="availableOptions" option-label="label" class="w-full">
-                        <template #option="slotProps">
-                            <div class="flex flex-row gap-1">
-                                <div class="flex items-center gap-2">
-                                    <Checkbox :modelValue="isItemSelected(slotProps.option)" binary :tabindex="-1"
-                                        readonly />
-                                    <span>{{ slotProps.option.label }}</span>
-                                </div>
-                                <span>({{ slotProps.option.total }})</span>
-
-                            </div>
-                        </template>
-                        <template #header>
-                            <div class="flex flex-row align-items-center justify-content-between p-2">
-                                <div class="flex flex-row align-items-center gap-2">
-                                    <span class="text-sm">{{ availableSelected.length }}
-                                        seleccionados</span>
-                                </div>
-                                <span class="text-sm underline cursor-pointer"
-                                    v-on:click="restartAvailable()">Reestablecer</span>
-                            </div>
-                        </template>
-                    </Select>
+                    <Select placeholder="Disponibilidad del Producto" v-model="availableSelected"
+                        :options="availableOptions" option-label="label" class="w-full" />
                 </InputGroup>
             </div>
             <div class="prices-container">

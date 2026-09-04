@@ -13,10 +13,14 @@ import OrderSummary from '@/components/OrderSummary.vue';
 
 const router = useRouter()
 const productStore = useProductStore();
-const { fetchProducts, cantidadPorDisponibilidad, categorias } = productStore;
+const { fetchProducts, categorias } = productStore;
 const { products, isLoading, pagina, total } = storeToRefs(productStore);
-const availableSelected = ref<AvailableFilterOption[]>([]);
-const availableOptions = ref<AvailableFilterOption[]>([]);
+const availableSelected = ref<AvailableFilterOption>({ label: 'Todos', value: null });
+const availableOptions = ref<AvailableFilterOption[]>([
+    { label: 'Todos', value: null },
+    { label: 'Disponible', value: true },
+    { label: 'Agotado', value: false }
+]);
 const categoriesOptions = ref<string[]>([]);
 const minPrice = ref<number | null>(null);
 const maxPrice = ref<number | null>(null);
@@ -42,7 +46,7 @@ watch(pagina, (currentPage) => {
 
 watch(availableSelected, (available) => {
     // Solo se envía el filtro cuando hay una única opción seleccionada (disponible o agotado)
-    const disponible = available.length === 1 ? available[0]!.value : undefined;
+    const disponible = available.value;
     void fetchProducts(pagina.value, rows.value, null, disponible, minPrice.value, maxPrice.value, categoriesSelected.value, ofertaValue.value)
 })
 
@@ -83,17 +87,7 @@ function onOfertaChange(oferta: boolean) {
 }
 
 async function loadFilterOptions() {
-    const disponibleOptions = await cantidadPorDisponibilidad();
     categoriesOptions.value = await categorias() ?? [];
-
-    availableOptions.value = [];
-    disponibleOptions?.forEach(option => {
-        availableOptions.value.push({
-            label: option.available === true ? 'Disponible' : 'Agotado',
-            value: option.available,
-            total: option.count
-        })
-    });
 }
 
 onMounted(() => {

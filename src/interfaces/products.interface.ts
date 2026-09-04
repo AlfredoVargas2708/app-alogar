@@ -28,6 +28,5 @@ export interface AvailableResponse {
 
 export interface AvailableFilterOption {
   label: string
-  value: boolean
-  total: number
+  value: boolean | null
 }

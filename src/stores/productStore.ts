@@ -60,15 +60,6 @@ export const useProductStore = defineStore('products', () => {
     }
   }
 
-  async function cantidadPorDisponibilidad() {
-    try {
-      const response = await api.get<AvailableResponse[]>('/cant-available')
-      return response.data
-    } catch (err: unknown) {
-      error.value = getErrorMessage(err, 'Error al Obtener Tipos Disponibilidad')
-    }
-  }
-
   async function categorias() {
     try {
       const response = await api.get<string[]>('/categories')
@@ -116,7 +107,6 @@ export const useProductStore = defineStore('products', () => {
     isLoading,
     error,
     fetchProducts,
-    cantidadPorDisponibilidad,
     categorias,
     pagina,
     total,
