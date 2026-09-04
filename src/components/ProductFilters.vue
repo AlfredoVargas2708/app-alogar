@@ -337,7 +337,6 @@ onUnmounted(() => {
         "categoria categoria categoria";
     align-items: center;
     gap: 20px;
-    flex-wrap: wrap;
 }
 
 .barcode-container {

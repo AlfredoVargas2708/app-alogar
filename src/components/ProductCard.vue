@@ -45,8 +45,13 @@ function addProduct() {
             <div class="product-types">
                 <h4>Categorías</h4>
                 <div class="types">
-                    <Tag v-for="type in props.product.productType" :key="type" class="product-type">{{ type }}
-                    </Tag>
+                    <template v-if="props.product.productType.length > 0">
+                        <Tag v-for="type in props.product.productType" :key="type" class="product-type">{{ type }}
+                        </Tag>
+                    </template>
+                    <template v-else>
+                        <span>Sin Categorización</span>
+                    </template>
                 </div>
             </div>
         </div>
@@ -64,8 +69,8 @@ function addProduct() {
     display: grid;
     grid-template-areas: "imagen contenido"
         "footer footer";
-    grid-template-columns: 200px 1fr;
-    height: 190px;
+    grid-template-columns: 150px 1fr;
+    height: 200px;
     column-gap: 10px;
     border: 1px solid var(--color-principal);
     border-radius: 10px;
@@ -173,7 +178,7 @@ function addProduct() {
 
         .product-type {
             padding: 5px 10px;
-            font-size: 14px;
+            font-size: 12px;
             background-color: var(--color-principal);
             color: #FFFFFF;
             text-transform: capitalize;

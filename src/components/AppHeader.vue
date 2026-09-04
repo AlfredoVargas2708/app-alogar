@@ -27,6 +27,7 @@ defineEmits<{ logout: [] }>();
     grid-template-areas: "logo titulo titulo titulo titulo boton";
     padding-bottom: 10px;
     align-items: center;
+    height: 75px;
 }
 
 .image-container {
@@ -34,6 +35,11 @@ defineEmits<{ logout: [] }>();
     display: flex;
     justify-content: start;
     align-items: center;
+    height: 60px;
+
+    img {
+        height: 100%;
+    }
 }
 
 .title {
