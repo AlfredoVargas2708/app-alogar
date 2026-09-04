@@ -30,6 +30,7 @@ export const useProductStore = defineStore('products', () => {
     minPrice?: number | null,
     maxPrice?: number | null,
     categories?: string[] | null,
+    oferta?: boolean,
   ) {
     isLoading.value = true
     error.value = null
@@ -43,6 +44,7 @@ export const useProductStore = defineStore('products', () => {
           ...(minPrice !== undefined && minPrice !== null ? { precioMinimo: minPrice } : {}),
           ...(maxPrice !== undefined && maxPrice !== null ? { precioMaximo: maxPrice } : {}),
           ...(categories && categories.length > 0 ? { categorias: categories } : {}),
+          ...(oferta === true ? { oferta } : {}),
         },
       })
       products.value = response.data.productos

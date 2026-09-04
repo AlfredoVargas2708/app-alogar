@@ -9,7 +9,7 @@ import Checkbox from 'primevue/checkbox';
 import InputNumber, { type InputNumberInputEvent } from 'primevue/inputnumber';
 import type { AutoCompleteOptionSelectEvent } from 'primevue/autocomplete';
 import { debounce } from 'lodash-es';
-import { Dollar, Filter, Search } from '@/shared/icons';
+import { Check, Dollar, Filter, Search, Times } from '@/shared/icons';
 import { formatCurrency } from '@/shared/currency';
 import { useProductStore } from '@/stores/productStore';
 import type { AvailableFilterOption } from '@/interfaces/products.interface';
@@ -27,6 +27,7 @@ const emit = defineEmits<{
     'min-price': [precio: number | null];
     'max-price': [precio: number | null];
     categories: [categorias: string[]];
+    oferta: [oferta: boolean]
     clear: [];
 }>();
 
@@ -42,11 +43,18 @@ const nameAutoComplete = ref<{ show: () => void } | null>(null);
 const categoriesSelected = ref<string[]>([]);
 const minPrice = ref<number | null>(null);
 const maxPrice = ref<number | null>(null);
+const checked = ref(false);
+const isIndeterminate = ref(true);
 let skipNextNameSearch = false;
 let nameSearchRequest = 0;
 
 const isItemSelected = (available: AvailableFilterOption) => availableSelected.value.includes(available);
 const isCategorySelected = (category: string) => categoriesSelected.value.includes(category);
+
+const onCheck = () => {
+    isIndeterminate.value = false;
+    emit('oferta', checked.value)
+};
 
 function restartAvailable() {
     availableSelected.value = [];
@@ -316,6 +324,15 @@ onUnmounted(() => {
                     </Select>
                 </InputGroup>
             </div>
+            <div class="oferta-container">
+                <Checkbox v-model="checked" binary indeterminate inputId="checkbox-indicator" @change="onCheck">
+                    <template #icon="{ checked, class: iconClass }">
+                        <Check v-if="checked" :class="iconClass" />
+                        <Times v-else :class="iconClass" />
+                    </template>
+                </Checkbox>
+                <label for="checkbox-indicator" class="text-medium">En Oferta</label>
+            </div>
         </div>
     </div>
 </template>
@@ -332,9 +349,9 @@ onUnmounted(() => {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2fr);
     grid-template-areas:
-        "codigo nombre nombre"
-        "disponible precios precios"
-        "categoria categoria categoria";
+        "codigo nombre nombre nombre"
+        "disponible precios precios precios"
+        "categoria categoria categoria oferta";
     align-items: center;
     gap: 20px;
 }
@@ -365,10 +382,16 @@ onUnmounted(() => {
     width: 100%;
 }
 
+.oferta-container {
+    grid-area: oferta;
+    gap: 10px;
+}
+
 .name-container,
 .categories-container,
 .available-container,
-.prices-container {
+.prices-container,
+.oferta-container {
     width: 100%;
     height: 100%;
     display: flex;
