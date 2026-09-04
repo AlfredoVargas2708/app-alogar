@@ -14,6 +14,7 @@ import Trash from '@primeicons/vue/trash'
 import Times from '@primeicons/vue/times'
 import MoneyBill from '@primeicons/vue/money-bill'
 import CreditCard from '@primeicons/vue/credit-card'
+import Check from '@primeicons/vue/check'
 
 export {
   SignOut,
@@ -32,4 +33,5 @@ export {
   Times,
   MoneyBill,
   CreditCard,
+  Check,
 }

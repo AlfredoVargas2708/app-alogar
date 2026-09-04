@@ -14,6 +14,7 @@ declare module 'vue' {
     AppHeader: typeof import('./src/components/AppHeader.vue')['default']
     Button: typeof import('primevue/button')['default']
     Card: typeof import('primevue/card')['default']
+    CardModal: typeof import('./src/components/CardModal.vue')['default']
     InputNumber: typeof import('primevue/inputnumber')['default']
     OrdenCard: typeof import('./src/components/OrdenCard.vue')['default']
     OrderSummary: typeof import('./src/components/OrderSummary.vue')['default']

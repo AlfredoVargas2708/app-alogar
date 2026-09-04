@@ -7,14 +7,16 @@ import { formatCurrency } from '@/shared/currency.ts';
 import type { Product } from '@/interfaces/products.interface.ts';
 import Button from 'primevue/button';
 import { CreditCard, MoneyBill, Times } from '@/shared/icons.ts';
-import type InputNumber from 'primevue/inputnumber';
+import InputNumber from 'primevue/inputnumber';
+import Dialog from 'primevue/dialog';
+import CardModal from './CardModal.vue';
 
 const productsStore = useProductStore();
 const { deleteOrden } = productsStore
 const { ordenProducts } = storeToRefs(productsStore)
 const saleType = ref<string>("");
 const totalRecibido = ref<number | null>(null);
-const cardMethod = ref<string>('');
+const cardModalVisible = ref<boolean>(false);
 
 const totalPagar = computed(() => {
     return ordenProducts.value.reduce((acc: number, product: Product) => {
@@ -34,7 +36,7 @@ function changeSaleType(type: string) {
     }
 
     if (saleType.value === 'card') {
-        cardMethod.value = '';
+        cardModalVisible.value = true;
     }
 }
 
@@ -43,10 +45,13 @@ function restartOrden() {
     saleType.value = "";
 }
 
+function updateShowModal(event: boolean) {
+    cardModalVisible.value = event;
+}
+
 watch(() => ordenProducts.value.length, (productCount) => {
     if (productCount === 0) {
         saleType.value = "";
-        cardMethod.value = '';
         totalRecibido.value = null;
     }
 })
@@ -71,24 +76,6 @@ watch(() => ordenProducts.value.length, (productCount) => {
                         </p>
                         <p class="vuelto px-5">Vuelto a Entregar: <span>{{ formatCurrency(vuelto) }}</span></p>
                     </div>
-                    <div class="card-container" v-if="saleType === 'card'">
-                        <h2 class="px-5">Tipo de Pago</h2>
-                        <div class="cards">
-                            <Button>
-                                <img src="/visa.png" alt="">
-                            </Button>
-                            <Button>
-                                <img src="/mercado-pago.png" alt="">
-                            </Button>
-                            <Button>
-                                <img src="/google-pay.jpg" alt="">
-
-                            </Button>
-                            <Button>
-                                <img src="/apple-pay.png" alt="">
-                            </Button>
-                        </div>
-                    </div>
                 </template>
             </div>
         </div>
@@ -107,6 +94,10 @@ watch(() => ordenProducts.value.length, (productCount) => {
             </Button>
         </div>
     </div>
+    <Dialog v-model:visible="cardModalVisible" modal dismissable-mask :closable="false"
+        :style="{ width: '50rem', height: '25rem' }">
+        <CardModal :show-modal="cardModalVisible" @update:show-modal="updateShowModal($event)" />
+    </Dialog>
 </template>
 
 <style scoped>
