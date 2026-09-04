@@ -5,7 +5,6 @@ import { storeToRefs } from 'pinia';
 import { useProductStore } from '@/stores/productStore';
 import { onMounted, ref, watch } from 'vue';
 import type { PageState } from 'primevue/paginator';
-import { formatCurrency } from '@/shared/currency';
 import type { AvailableFilterOption } from '@/interfaces/products.interface';
 import AppHeader from '@/components/AppHeader.vue';
 import ProductFilters from '@/components/ProductFilters.vue';
@@ -14,13 +13,11 @@ import OrderSummary from '@/components/OrderSummary.vue';
 
 const router = useRouter()
 const productStore = useProductStore();
-const { fetchProducts, cantidadPorDisponibilidad, maximoPrecio, categorias } = productStore;
+const { fetchProducts, cantidadPorDisponibilidad, categorias } = productStore;
 const { products, isLoading, pagina, total } = storeToRefs(productStore);
 const availableSelected = ref<AvailableFilterOption[]>([]);
 const availableOptions = ref<AvailableFilterOption[]>([]);
 const categoriesOptions = ref<string[]>([]);
-const maxPriceLimit = ref<number>(0);
-const maxPricePlaceholder = ref<string>('');
 const minPrice = ref<number | null>(null);
 const maxPrice = ref<number | null>(null);
 const categoriesSelected = ref<string[]>([]);
@@ -87,7 +84,6 @@ function onOfertaChange(oferta: boolean) {
 
 async function loadFilterOptions() {
     const disponibleOptions = await cantidadPorDisponibilidad();
-    maxPriceLimit.value = await maximoPrecio() ?? 0;
     categoriesOptions.value = await categorias() ?? [];
 
     availableOptions.value = [];
@@ -98,8 +94,6 @@ async function loadFilterOptions() {
             total: option.count
         })
     });
-
-    maxPricePlaceholder.value = `Precio Máximo: (${formatCurrency(maxPriceLimit.value)})`;
 }
 
 onMounted(() => {
@@ -115,8 +109,7 @@ onMounted(() => {
                 <AppHeader @logout="logout" />
                 <div class="products">
                     <ProductFilters v-model:available-selected="availableSelected" :available-options="availableOptions"
-                        :categories-options="categoriesOptions" :max-price-limit="maxPriceLimit"
-                        :max-price-placeholder="maxPricePlaceholder" @select-product="onProductSelected"
+                        :categories-options="categoriesOptions" @select-product="onProductSelected"
                         @min-price="onMinPriceChange" @max-price="onMaxPriceChange" @categories="onCategoriesChange"
                         @clear="onFiltersClear" @oferta="onOfertaChange" />
                     <ProductListing v-model:first="first" v-model:rows="rows" :products="products"

@@ -10,7 +10,6 @@ import InputNumber, { type InputNumberInputEvent } from 'primevue/inputnumber';
 import type { AutoCompleteOptionSelectEvent } from 'primevue/autocomplete';
 import { debounce } from 'lodash-es';
 import { Check, Dollar, Filter, Search, Times } from '@/shared/icons';
-import { formatCurrency } from '@/shared/currency';
 import { useProductStore } from '@/stores/productStore';
 import type { AvailableFilterOption } from '@/interfaces/products.interface';
 import InputText from 'primevue/inputtext';
@@ -18,8 +17,6 @@ import InputText from 'primevue/inputtext';
 const props = defineProps<{
     availableOptions: AvailableFilterOption[];
     categoriesOptions: string[];
-    maxPriceLimit: number;
-    maxPricePlaceholder: string;
 }>();
 
 const emit = defineEmits<{
@@ -126,10 +123,6 @@ const onToggleAll = (checked: unknown) => {
 watch(categoriesSelected, (categories) => {
     emit('categories', [...categories]);
 });
-
-const precioLimite = computed(() => {
-    return (maxPrice.value ?? 0) > props.maxPriceLimit
-})
 
 const mainInputRef = ref<InstanceType<typeof InputText> | null>(null)
 
@@ -276,13 +269,10 @@ onUnmounted(() => {
                         </InputGroupAddon>
                         <FloatLabel>
                             <InputNumber input-id="max-price" mode="currency" v-model="maxPrice" currency="CLP"
-                                locale="es-CL" :invalid="precioLimite" @input="onMaxPriceInput" />
-                            <label for="max-price">{{ maxPricePlaceholder }}</label>
+                                locale="es-CL" @input="onMaxPriceInput" />
+                            <label for="max-price">Precio Máximo</label>
                         </FloatLabel>
                     </InputGroup>
-                    <small class="max-price-error" v-if="precioLimite">
-                        Se superó el precio límite de {{ formatCurrency(maxPriceLimit) }}
-                    </small>
                 </div>
             </div>
             <div class="categories-container">
