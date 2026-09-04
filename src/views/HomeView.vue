@@ -12,13 +12,15 @@ import ProductListing from '@/components/ProductListing.vue';
 import OrderSummary from '@/components/OrderSummary.vue';
 import type { Sale } from '@/interfaces/sale.interface';
 import { useSaleStore } from '@/stores/saleStore';
+import { useToast } from 'primevue/usetoast';
+import Toast from 'primevue/toast';
 
 const router = useRouter()
 const productStore = useProductStore();
 const saleStore = useSaleStore();
 const { fetchProducts, categorias } = productStore;
 const { createSale } = saleStore
-const { products, isLoading, pagina, total } = storeToRefs(productStore);
+const { products, isLoading, pagina, total, ordenProducts } = storeToRefs(productStore);
 const { isLoadingSale } = storeToRefs(saleStore);
 const availableSelected = ref<AvailableFilterOption>({ label: 'Todos', value: null });
 const availableOptions = ref<AvailableFilterOption[]>([
@@ -33,6 +35,7 @@ const categoriesSelected = ref<string[]>([]);
 const first = ref(0);
 const rows = ref(12);
 const ofertaValue = ref<boolean>(false);
+const toast = useToast();
 
 function logout() {
     localStorage.removeItem('username');
@@ -91,8 +94,18 @@ function onOfertaChange(oferta: boolean) {
     void fetchProducts(1, rows.value, null, null, minPrice.value, maxPrice.value, null, oferta);
 }
 
-function onSale(sale: Sale) {
-    void createSale(sale);
+async function onSale(sale: Sale) {
+    try {
+        await createSale(sale);
+        if (saleStore.error) {
+            toast.add({ severity: 'error', summary: 'Error Venta', detail: saleStore.error, life: 5000 });
+        } else {
+            ordenProducts.value = [];
+            toast.add({ severity: 'success', summary: 'Venta Creada', detail: 'Venta realizada con éxito en el sistema.', life: 5000 });
+        }
+    } catch (error: unknown) {
+        toast.add({ severity: 'error', summary: 'Error Venta', detail: `Error inesperado al realizar la venta: ${error}`, life: 5000 });
+    }
 }
 
 async function loadFilterOptions() {
@@ -122,6 +135,7 @@ onMounted(() => {
             </div>
         </template>
     </Card>
+    <Toast position="center" class="toast" />
 </template>
 
 <style scoped>
