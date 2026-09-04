@@ -105,8 +105,8 @@ function addProduct() {
     }
 
     .product-offer {
-        top: 5%;
-        right: 5%;
+        bottom: 5%;
+        left: 5%;
         border: 1px solid var(--color-principal);
         background-color: #FFFFFF;
     }
