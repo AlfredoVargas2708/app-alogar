@@ -11,6 +11,19 @@ const api = axios.create({
   },
 })
 
+// URL base pública del backend (sin barra final)
+export const apiUrl = (import.meta.env.VITE_API_URL ?? 'http://localhost:3000').replace(/\/$/, '')
+
+// Resuelve la ruta de una imagen: las subidas al backend llegan como
+// "/uploads/<archivo>" (relativa) y las de Shopify como URL absoluta
+export function getImageSrc(src: string | null | undefined): string {
+  if (!src) {
+    return ''
+  }
+
+  return src.startsWith('/') ? `${apiUrl}${src}` : src
+}
+
 // Adjunta el JWT del usuario logueado; si no hay sesión, usa el token de respaldo
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token') || fallbackToken

@@ -3,6 +3,7 @@ import type { Product } from '@/interfaces/products.interface';
 import { formatCurrency } from '@/shared/currency';
 import { ShoppingCart } from '@/shared/icons';
 import { useProductStore } from '@/stores/productStore';
+import { getImageSrc } from '@/services/api';
 import { storeToRefs } from 'pinia';
 import type Button from 'primevue/button';
 import Tag from 'primevue/tag';
@@ -30,7 +31,7 @@ function addProduct() {
             <span v-if="props.product.offer_price" class="product-offer">
                 En Oferta
             </span>
-            <img v-if="props.product.imageUrl" :src="props.product.imageUrl" :alt="props.product.title" />
+            <img v-if="props.product.imageUrl" :src="getImageSrc(props.product.imageUrl)" :alt="props.product.title" />
         </div>
         <div class="product-content">
             <div class="product-title">

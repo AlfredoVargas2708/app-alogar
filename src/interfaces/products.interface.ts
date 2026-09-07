@@ -37,4 +37,5 @@ export interface ProductPayload {
   productType?: string | null
   grams?: number | null
   barcode?: string | null
+  imageFile?: File | null
 }

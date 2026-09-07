@@ -150,13 +150,35 @@ export const useProductStore = defineStore('products', () => {
     }
   }
 
+  // Arma el FormData para crear/editar productos (permite adjuntar imagen)
+  function buildProductFormData(payload: Partial<ProductPayload>): FormData {
+    const formData = new FormData()
+
+    for (const [key, value] of Object.entries(payload)) {
+      if (value === undefined || value === null || key === 'imageFile') {
+        continue
+      }
+      formData.append(key, String(value))
+    }
+
+    if (payload.imageFile) {
+      formData.append('imageFile', payload.imageFile)
+    }
+
+    return formData
+  }
+
   async function createProduct(payload: ProductPayload) {
-    const response = await api.post<Product>('/products', payload)
+    const response = await api.post<Product>('/products', buildProductFormData(payload), {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
     return response.data
   }
 
   async function updateProduct(id: number, payload: Partial<ProductPayload>) {
-    const response = await api.put<Product>(`/products/${id}`, payload)
+    const response = await api.put<Product>(`/products/${id}`, buildProductFormData(payload), {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
     return response.data
   }
 

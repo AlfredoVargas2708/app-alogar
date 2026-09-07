@@ -22,6 +22,7 @@ import Pencil from '@primeicons/vue/pencil'
 import List from '@primeicons/vue/list'
 import Calendar from '@primeicons/vue/calendar'
 import TagIcon from '@primeicons/vue/tag'
+import Upload from '@primeicons/vue/upload'
 
 export {
   SignOut,
@@ -48,4 +49,5 @@ export {
   List,
   Calendar,
   TagIcon,
+  Upload,
 }

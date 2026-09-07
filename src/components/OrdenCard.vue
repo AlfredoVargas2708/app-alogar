@@ -3,6 +3,7 @@ import type { Product } from '@/interfaces/products.interface';
 import { formatCurrency } from '@/shared/currency';
 import { Minus, Plus, Trash } from '@/shared/icons';
 import { useProductStore } from '@/stores/productStore';
+import { getImageSrc } from '@/services/api';
 import Button from 'primevue/button';
 import InputNumber, { type InputNumberInputEvent } from 'primevue/inputnumber';
 import RadioButton from 'primevue/radiobutton';
@@ -39,7 +40,7 @@ const onCantidadChange = (event: InputNumberInputEvent) => {
 <template>
     <div class="orden-card">
         <div class="product-image">
-            <img :src="props.product.imageUrl" alt="">
+            <img :src="getImageSrc(props.product.imageUrl)" alt="">
         </div>
         <div class="product-contenido">
             <div class="product-title">

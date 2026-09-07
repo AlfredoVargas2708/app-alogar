@@ -17,6 +17,7 @@ import type { PageState } from 'primevue/paginator';
 import { useProductStore } from '@/stores/productStore';
 import { formatCurrency } from '@/shared/currency';
 import { Pencil, Plus, Search, Trash, Times } from '@/shared/icons';
+import { getImageSrc } from '@/services/api';
 import type { Product, ProductPayload } from '@/interfaces/products.interface';
 import ProductFormDialog from './ProductFormDialog.vue';
 
@@ -187,7 +188,7 @@ onMounted(() => {
             </template>
             <Column header="Imagen" style="width: 80px">
                 <template #body="{ data }">
-                    <img v-if="data.imageUrl" :src="data.imageUrl" :alt="data.title" class="row-image" />
+                    <img v-if="data.imageUrl" :src="getImageSrc(data.imageUrl)" :alt="data.title" class="row-image" />
                     <div v-else class="row-image no-image">Sin imagen</div>
                 </template>
             </Column>

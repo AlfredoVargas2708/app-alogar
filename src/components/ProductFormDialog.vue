@@ -7,7 +7,8 @@ import InputNumber from 'primevue/inputnumber';
 import FloatLabel from 'primevue/floatlabel';
 import ToggleSwitch from 'primevue/toggleswitch';
 import type { Product, ProductPayload } from '@/interfaces/products.interface';
-import { Check, Times } from '@/shared/icons';
+import { getImageSrc } from '@/services/api';
+import { Check, Times, Upload } from '@/shared/icons';
 
 const props = defineProps<{
     product: Product | null;
@@ -25,6 +26,9 @@ const price = ref<number | null>(null);
 const offerPrice = ref<number | null>(null);
 const grams = ref<number | null>(null);
 const imageUrl = ref<string>('');
+const imageFile = ref<File | null>(null);
+const imagePreview = ref<string>('');
+const fileInputRef = ref<HTMLInputElement | null>(null);
 const categoriasText = ref<string>('');
 const barcode = ref<string>('');
 const available = ref<boolean>(true);
@@ -32,6 +36,31 @@ const available = ref<boolean>(true);
 const isEditing = computed(() => props.product !== null);
 
 const isValid = computed(() => title.value.trim().length > 0 && (price.value ?? 0) > 0);
+
+function onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+
+    imageFile.value = file;
+    if (file) {
+        imagePreview.value = URL.createObjectURL(file);
+    }
+}
+
+function removeSelectedFile() {
+    imageFile.value = null;
+    imagePreview.value = imageUrl.value.trim() ? getImageSrc(imageUrl.value.trim()) : '';
+    if (fileInputRef.value) {
+        fileInputRef.value.value = '';
+    }
+}
+
+watch(imageUrl, (url) => {
+    // La URL solo genera vista previa si no hay un archivo seleccionado
+    if (!imageFile.value) {
+        imagePreview.value = url.trim() ? getImageSrc(url.trim()) : '';
+    }
+});
 
 watch(visible, (isVisible) => {
     if (!isVisible) {
@@ -43,6 +72,8 @@ watch(visible, (isVisible) => {
     offerPrice.value = props.product?.offer_price ?? null;
     grams.value = props.product?.grams ?? null;
     imageUrl.value = props.product?.imageUrl ?? '';
+    imageFile.value = null;
+    imagePreview.value = props.product?.imageUrl ? getImageSrc(props.product.imageUrl) : '';
     categoriasText.value = props.product?.productType?.join(', ') ?? '';
     barcode.value = props.product?.barcode ?? '';
     available.value = props.product?.available ?? true;
@@ -67,6 +98,7 @@ function onSave() {
         productType: categorias.length > 0 ? categorias.join(',') : null,
         grams: grams.value ?? null,
         barcode: barcode.value.trim() || null,
+        imageFile: imageFile.value,
     };
 
     emit('save', { id: props.product?.id ?? null, payload });
@@ -122,11 +154,28 @@ function onCancel() {
                 </FloatLabel>
             </div>
             <div class="form-row full">
-                <FloatLabel>
+                <span class="image-label">Imagen del Producto</span>
+                <div class="image-source">
+                    <input ref="fileInputRef" type="file" accept="image/png,image/jpeg,image/gif,image/webp,image/avif"
+                        class="file-input" @change="onFileSelected" />
+                    <Button type="button" class="upload-button" :disabled="saving"
+                        @click="fileInputRef?.click()">
+                        <Upload :size="16" />
+                        {{ imageFile ? 'Cambiar archivo' : 'Subir imagen' }}
+                    </Button>
+                    <span v-if="imageFile" class="file-name">
+                        {{ imageFile.name }}
+                        <Button type="button" text rounded severity="danger" aria-label="Quitar archivo"
+                            :disabled="saving" @click="removeSelectedFile">
+                            <Times :size="14" />
+                        </Button>
+                    </span>
+                </div>
+                <FloatLabel v-if="!imageFile">
                     <InputText id="product-image" v-model="imageUrl" class="w-full" />
-                    <label for="product-image">URL de la Imagen</label>
+                    <label for="product-image">O pega la URL de la Imagen</label>
                 </FloatLabel>
-                <img v-if="imageUrl.trim()" :src="imageUrl" alt="Vista previa" class="image-preview"
+                <img v-if="imagePreview" :src="imagePreview" alt="Vista previa" class="image-preview"
                     @error="($event.target as HTMLImageElement).style.display = 'none'"
                     @load="($event.target as HTMLImageElement).style.display = 'block'" />
             </div>
@@ -169,6 +218,48 @@ function onCancel() {
     display: flex;
     align-items: center;
     gap: 10px;
+}
+
+.image-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-principal);
+}
+
+.image-source {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.file-input {
+    display: none;
+}
+
+.upload-button {
+    background-color: transparent;
+    border: 1px solid var(--color-principal);
+    color: var(--color-principal);
+
+    &:hover {
+        background-color: color-mix(in srgb, var(--color-principal) 10%, white);
+    }
+}
+
+.file-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--color-principal);
+    background-color: color-mix(in srgb, var(--color-principal) 8%, white);
+    padding: 4px 8px;
+    border-radius: 8px;
+    max-width: 260px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .image-preview {

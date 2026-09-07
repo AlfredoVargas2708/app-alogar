@@ -126,8 +126,9 @@ function onClearBuscador() {
     emit('clear');
 }
 
-// Busca el producto por código de barras al presionar Enter o al perder el foco
-// (los lectores de código de barras envían el código completo seguido de Enter)
+// Busca el producto por código de barras. Se dispara solo tras una pausa de
+// tipeo (debounce) o inmediatamente con Enter (los lectores escanean muy rápido,
+// por lo que la búsqueda se gatilla sola al terminar de escanear).
 async function onBarcodeScan() {
     const barcode = barcodeSearch.value?.trim();
 
@@ -149,6 +150,17 @@ async function onBarcodeScan() {
         isBarcodeLoading.value = false;
         keepFocus();
     }
+}
+
+// Pausa de 400ms tras el último dígito antes de buscar automáticamente
+const onBarcodeInput = debounce(() => {
+    void onBarcodeScan();
+}, 400);
+
+// Enter fuerza la búsqueda inmediata y cancela la automática pendiente
+function onBarcodeEnter() {
+    onBarcodeInput.cancel();
+    void onBarcodeScan();
 }
 
 function onSelectProduct(event: AutoCompleteOptionSelectEvent) {
@@ -211,6 +223,7 @@ onMounted(() => {
 
 onUnmounted(() => {
     searchByPriceDebounced.cancel();
+    onBarcodeInput.cancel();
     window.removeEventListener('focusout', handleFocusOut)
 })
 </script>
@@ -227,7 +240,8 @@ onUnmounted(() => {
                     </InputGroupAddon>
                     <FloatLabel>
                         <InputText ref="mainInputRef" v-model="barcodeSearch" :autofocus="true"
-                            :disabled="isBarcodeLoading" @keydown.enter.prevent="onBarcodeScan" />
+                            :disabled="isBarcodeLoading" @update:model-value="onBarcodeInput"
+                            @keydown.enter.prevent="onBarcodeEnter" />
                         <label for="">Buscar Por Código de Barras</label>
                     </FloatLabel>
                 </InputGroup>
