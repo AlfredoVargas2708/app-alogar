@@ -86,6 +86,19 @@ export const useProductStore = defineStore('products', () => {
     }
   }
 
+  async function buscarPorBarcode(barcode: string) {
+    try {
+      const response = await api.get<Product>(`/products/barcode/${encodeURIComponent(barcode.trim())}`)
+      return response.data
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err) && err.response?.status === 404) {
+        return null
+      }
+      error.value = getErrorMessage(err, 'Error al buscar el código de barras')
+      return null
+    }
+  }
+
   function addOrdenProduct(product: Product) {
     ordenProducts.value.push({ ...product, cantidad: 1, isWeight: false })
   }
@@ -161,6 +174,7 @@ export const useProductStore = defineStore('products', () => {
     total,
     totalPaginas,
     buscadorNombres,
+    buscarPorBarcode,
     ordenProducts,
     addOrdenProduct,
     deleteOrdenProduct,

@@ -20,6 +20,7 @@ export interface Product {
   isWeight: boolean | null
   weight: number | null
   grams: number | null
+  barcode: string | null
 }
 
 export interface AvailableFilterOption {
@@ -35,4 +36,5 @@ export interface ProductPayload {
   imageUrl?: string | null
   productType?: string | null
   grams?: number | null
+  barcode?: string | null
 }

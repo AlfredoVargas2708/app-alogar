@@ -5,7 +5,7 @@ import { storeToRefs } from 'pinia';
 import { useProductStore } from '@/stores/productStore';
 import { onMounted, ref, watch } from 'vue';
 import type { PageState } from 'primevue/paginator';
-import type { AvailableFilterOption } from '@/interfaces/products.interface';
+import type { AvailableFilterOption, Product } from '@/interfaces/products.interface';
 import AppHeader from '@/components/AppHeader.vue';
 import ProductFilters from '@/components/ProductFilters.vue';
 import ProductListing from '@/components/ProductListing.vue';
@@ -20,7 +20,7 @@ const router = useRouter()
 const userStore = useUserStore();
 const productStore = useProductStore();
 const saleStore = useSaleStore();
-const { fetchProducts, categorias } = productStore;
+const { fetchProducts, categorias, addOrdenProduct } = productStore;
 const { createSale } = saleStore
 const { products, isLoading, pagina, total, ordenProducts } = storeToRefs(productStore);
 const { isLoadingSale } = storeToRefs(saleStore);
@@ -61,6 +61,26 @@ watch(availableSelected, (available) => {
 function onProductSelected(name: string) {
     first.value = 0;
     void fetchProducts(1, rows.value, name, null, minPrice.value, maxPrice.value, categoriesSelected.value, ofertaValue.value);
+}
+
+// Agrega el producto escaneado directamente a la orden, igual que el botón "Agregar al carrito"
+function onBarcodeProduct(product: Product) {
+    if (!product.available) {
+        toast.add({ severity: 'warn', summary: 'Producto Agotado', detail: `"${product.title}" no está disponible.`, life: 4000 });
+        return;
+    }
+
+    if (ordenProducts.value.some((ordenProduct) => ordenProduct.id === product.id)) {
+        toast.add({ severity: 'info', summary: 'Ya Agregado', detail: `"${product.title}" ya está en la orden.`, life: 4000 });
+        return;
+    }
+
+    addOrdenProduct(product);
+    toast.add({ severity: 'success', summary: 'Producto Agregado', detail: `"${product.title}" se agregó a la orden.`, life: 3000 });
+}
+
+function onBarcodeNotFound(barcode: string) {
+    toast.add({ severity: 'warn', summary: 'Código No Encontrado', detail: `No existe un producto con el código "${barcode}".`, life: 4000 });
 }
 
 function onMinPriceChange(value: number | null) {
@@ -126,6 +146,7 @@ onMounted(() => {
                 <div class="products">
                     <ProductFilters v-model:available-selected="availableSelected" :available-options="availableOptions"
                         :categories-options="categoriesOptions" @select-product="onProductSelected"
+                        @barcode-product="onBarcodeProduct" @barcode-not-found="onBarcodeNotFound"
                         @min-price="onMinPriceChange" @max-price="onMaxPriceChange" @categories="onCategoriesChange"
                         @clear="onFiltersClear" @oferta="onOfertaChange" />
                     <ProductListing v-model:first="first" v-model:rows="rows" :products="products"

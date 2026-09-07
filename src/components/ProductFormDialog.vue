@@ -26,6 +26,7 @@ const offerPrice = ref<number | null>(null);
 const grams = ref<number | null>(null);
 const imageUrl = ref<string>('');
 const categoriasText = ref<string>('');
+const barcode = ref<string>('');
 const available = ref<boolean>(true);
 
 const isEditing = computed(() => props.product !== null);
@@ -43,6 +44,7 @@ watch(visible, (isVisible) => {
     grams.value = props.product?.grams ?? null;
     imageUrl.value = props.product?.imageUrl ?? '';
     categoriasText.value = props.product?.productType?.join(', ') ?? '';
+    barcode.value = props.product?.barcode ?? '';
     available.value = props.product?.available ?? true;
 });
 
@@ -64,6 +66,7 @@ function onSave() {
         imageUrl: imageUrl.value.trim() || null,
         productType: categorias.length > 0 ? categorias.join(',') : null,
         grams: grams.value ?? null,
+        barcode: barcode.value.trim() || null,
     };
 
     emit('save', { id: props.product?.id ?? null, payload });
@@ -101,6 +104,12 @@ function onCancel() {
                     <InputNumber id="product-grams" v-model="grams" suffix=" gr" class="w-full" />
                     <label for="product-grams">Gramos (productos pesables)</label>
                 </FloatLabel>
+                <FloatLabel>
+                    <InputText id="product-barcode" v-model="barcode" class="w-full" />
+                    <label for="product-barcode">Código de Barras</label>
+                </FloatLabel>
+            </div>
+            <div class="form-row full">
                 <div class="available-toggle">
                     <ToggleSwitch v-model="available" input-id="product-available" />
                     <label for="product-available">Disponible para la venta</label>

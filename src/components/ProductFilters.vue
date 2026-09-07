@@ -9,9 +9,9 @@ import Checkbox from 'primevue/checkbox';
 import InputNumber, { type InputNumberInputEvent } from 'primevue/inputnumber';
 import type { AutoCompleteOptionSelectEvent } from 'primevue/autocomplete';
 import { debounce } from 'lodash-es';
-import { Check, Dollar, Filter, Search, Times } from '@/shared/icons';
+import { Check, Dollar, Filter, Search, Spinner, Times } from '@/shared/icons';
 import { useProductStore } from '@/stores/productStore';
-import type { AvailableFilterOption } from '@/interfaces/products.interface';
+import type { AvailableFilterOption, Product } from '@/interfaces/products.interface';
 import InputText from 'primevue/inputtext';
 
 const props = defineProps<{
@@ -21,6 +21,8 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     'select-product': [name: string];
+    'barcode-product': [product: Product];
+    'barcode-not-found': [barcode: string];
     'min-price': [precio: number | null];
     'max-price': [precio: number | null];
     categories: [categorias: string[]];
@@ -30,11 +32,12 @@ const emit = defineEmits<{
 
 const availableSelected = defineModel<AvailableFilterOption | undefined>('availableSelected');
 
-const { buscadorNombres } = useProductStore();
+const { buscadorNombres, buscarPorBarcode } = useProductStore();
 
 const nombreBuscador = ref<string | null>(null);
 const nombreOptions = ref<string[]>([]);
 const barcodeSearch = ref<string | null>(null);
+const isBarcodeLoading = ref<boolean>(false);
 const isNameLoading = ref<boolean>(false);
 const nameAutoComplete = ref<{ show: () => void } | null>(null);
 const categoriesSelected = ref<string[]>([]);
@@ -55,6 +58,29 @@ const onCheck = () => {
 
 function restartCategories() {
     categoriesSelected.value = [];
+}
+
+const mainInputRef = ref<InstanceType<typeof InputText> | null>(null)
+
+// Función para forzar el foco en el input principal
+const keepFocus = () => {
+    nextTick(() => {
+        // Comprobar si el elemento activo actual es otro input/textarea/select o un componente de PrimeVue
+        const activeEl = document.activeElement
+        const isAnotherInput = activeEl && (
+            activeEl.tagName === 'INPUT' ||
+            activeEl.tagName === 'TEXTAREA' ||
+            activeEl.tagName === 'SELECT' ||
+            activeEl.classList.contains('p-inputtext') ||
+            activeEl.closest('.p-component') // Cubre dropdowns, calendar, etc. de PrimeVue
+        )
+
+        // Si no se está enfocando otro input válido, regresa el foco al principal
+        if (!isAnotherInput && mainInputRef.value) {
+            const element = (mainInputRef.value as unknown as { $el: HTMLInputElement }).$el
+            element?.focus()
+        }
+    })
 }
 
 const searchProductNames = debounce(async (newQuery: string | null) => {
@@ -100,6 +126,31 @@ function onClearBuscador() {
     emit('clear');
 }
 
+// Busca el producto por código de barras al presionar Enter o al perder el foco
+// (los lectores de código de barras envían el código completo seguido de Enter)
+async function onBarcodeScan() {
+    const barcode = barcodeSearch.value?.trim();
+
+    if (!barcode || isBarcodeLoading.value) {
+        return;
+    }
+
+    isBarcodeLoading.value = true;
+    try {
+        const product = await buscarPorBarcode(barcode);
+
+        if (product) {
+            emit('barcode-product', product);
+        } else {
+            emit('barcode-not-found', barcode);
+        }
+    } finally {
+        barcodeSearch.value = null;
+        isBarcodeLoading.value = false;
+        keepFocus();
+    }
+}
+
 function onSelectProduct(event: AutoCompleteOptionSelectEvent) {
     skipNextNameSearch = true;
     nameSearchRequest++;
@@ -119,29 +170,6 @@ const onToggleAll = (checked: unknown) => {
 watch(categoriesSelected, (categories) => {
     emit('categories', [...categories]);
 });
-
-const mainInputRef = ref<InstanceType<typeof InputText> | null>(null)
-
-// Función para forzar el foco en el input principal
-const keepFocus = () => {
-    nextTick(() => {
-        // Comprobar si el elemento activo actual es otro input/textarea/select o un componente de PrimeVue
-        const activeEl = document.activeElement
-        const isAnotherInput = activeEl && (
-            activeEl.tagName === 'INPUT' ||
-            activeEl.tagName === 'TEXTAREA' ||
-            activeEl.tagName === 'SELECT' ||
-            activeEl.classList.contains('p-inputtext') ||
-            activeEl.closest('.p-component') // Cubre dropdowns, calendar, etc. de PrimeVue
-        )
-
-        // Si no se está enfocando otro input válido, regresa el foco al principal
-        if (!isAnotherInput && mainInputRef.value) {
-            const element = (mainInputRef.value as unknown as { $el: HTMLInputElement }).$el
-            element?.focus()
-        }
-    })
-}
 
 const handleFocusOut = () => {
     // Pequeña espera para dar tiempo al navegador de actualizar document.activeElement
@@ -194,10 +222,12 @@ onUnmounted(() => {
             <div class="barcode-container">
                 <InputGroup>
                     <InputGroupAddon>
-                        <Search />
+                        <Spinner v-if="isBarcodeLoading" :size="20" spin />
+                        <Search v-else />
                     </InputGroupAddon>
                     <FloatLabel>
-                        <InputText ref="mainInputRef" v-model="barcodeSearch" :autofocus="true" />
+                        <InputText ref="mainInputRef" v-model="barcodeSearch" :autofocus="true"
+                            :disabled="isBarcodeLoading" @keydown.enter.prevent="onBarcodeScan" />
                         <label for="">Buscar Por Código de Barras</label>
                     </FloatLabel>
                 </InputGroup>
