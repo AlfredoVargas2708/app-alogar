@@ -1,6 +1,14 @@
+import AdminView from '@/views/AdminView.vue'
 import Home from '@/views/HomeView.vue'
 import Login from '@/views/LoginView.vue'
+import { useUserStore, type UserRole } from '@/stores/userStore'
 import { createRouter, createWebHistory } from 'vue-router'
+
+declare module 'vue-router' {
+  interface RouteMeta {
+    role?: UserRole
+  }
+}
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -16,8 +24,39 @@ const router = createRouter({
     {
       path: '/home',
       component: Home,
+      meta: { role: 'empleado' },
+    },
+    {
+      path: '/admin',
+      component: AdminView,
+      meta: { role: 'admin' },
     },
   ],
+})
+
+router.beforeEach((to) => {
+  const userStore = useUserStore()
+  const requiredRole = to.meta.role
+
+  if (!requiredRole) {
+    return true
+  }
+
+  if (!userStore.userData) {
+    return { path: '/login' }
+  }
+
+  const userRole = userStore.userData.role ?? userStore.userData.user_role
+
+  if (!userRole) {
+    return { path: '/login' }
+  }
+
+  if (userRole !== requiredRole) {
+    return { path: userRole === 'admin' ? '/admin' : '/home', state: { role: userRole } }
+  }
+
+  return true
 })
 
 export default router

@@ -15,6 +15,7 @@ import LoadingView from './LoadingView.vue';
 import { Eye, EyeSlash, Lock, Spinner, UserIcon } from '@/shared/icons.ts';
 import Toast from 'primevue/toast';
 import { useToast } from 'primevue/usetoast';
+import Select from 'primevue/select';
 
 const isLogin = ref<boolean>(true);
 const isLoading = ref<boolean>(false);
@@ -24,6 +25,11 @@ const passwordMask = ref(true);
 const passwordRepeated = ref<string>('');
 const passwordRepeatedMask = ref(true);
 const passwordRepeatedError = ref<string>('');
+const userRole = ref<string>('');
+const userRoleOptions = ref<unknown[]>([
+    { label: 'Empleado', value: 'empleado' },
+    { label: 'Administrador', value: 'admin' }
+]);
 
 const userStore = useUserStore();
 const router = useRouter();
@@ -31,10 +37,11 @@ const toast = useToast();
 
 const loginResolved = ref(false);
 const loadingComplete = ref(false);
+const destinationPath = ref('/home');
 
 function goToHomeWhenReady() {
     if (loginResolved.value && loadingComplete.value) {
-        router.push({ path: '/home' });
+        router.push({ path: destinationPath.value });
     }
 }
 
@@ -50,7 +57,8 @@ async function login() {
 
     try {
         const user = await userStore.loginUser(userBody);
-        localStorage.setItem('username', user.usuario);
+        const userRole = user.role ?? user.user_role;
+        destinationPath.value = userRole === 'admin' ? '/admin' : '/home';
         loginResolved.value = true;
         isLoading.value = true;
         goToHomeWhenReady();
@@ -61,7 +69,7 @@ async function login() {
 }
 
 async function signup() {
-    const userBody = { usuario: username.value, password: password.value };
+    const userBody = { usuario: username.value, password: password.value, user_role: userRole.value };
     try {
         await userStore.signUpUser(userBody)
         toast.add({ summary: 'Nuevo Usuario', detail: 'Cuenta Creada Correctamente. Puede iniciar sesión con los parámetros ingresados', severity: 'success' });
@@ -180,6 +188,13 @@ watch([password, passwordRepeated], validateSamePassword);
                                     <label for="password">Repetir Contraseña</label>
                                 </FloatLabel>
                                 <span class="password-error">{{ passwordRepeatedError }}</span>
+                            </InputGroup>
+                            <InputGroup>
+                                <InputGroupAddon>
+                                    <UserIcon :size="24" />
+                                </InputGroupAddon>
+                                <Select v-model="userRole" :options="userRoleOptions" optionLabel="label"
+                                    optionValue="value" placeholder="Seleccione rol del usuario" class="flex-1" />
                             </InputGroup>
                         </div>
                     </Transition>
