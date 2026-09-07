@@ -7,6 +7,7 @@ export interface User {
   id: number
   usuario: string
   ultimoInicioSesion: string
+  token?: string
   role?: UserRole
   user_role?: UserRole
 }
@@ -41,6 +42,9 @@ export const useUserStore = defineStore('users', () => {
       userData.value = response.data
       localStorage.setItem('user', JSON.stringify(response.data))
       localStorage.setItem('username', response.data.usuario)
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token)
+      }
       return response.data
     } catch (err: unknown) {
       error.value = getErrorMessage(err, 'Error al iniciar sesión')
@@ -64,11 +68,19 @@ export const useUserStore = defineStore('users', () => {
     }
   }
 
+  function logout() {
+    userData.value = undefined
+    localStorage.removeItem('user')
+    localStorage.removeItem('token')
+    localStorage.removeItem('username')
+  }
+
   return {
     userData,
     isLoading,
     error,
     loginUser,
     signUpUser,
+    logout,
   }
 })

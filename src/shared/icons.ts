@@ -16,6 +16,12 @@ import MoneyBill from '@primeicons/vue/money-bill'
 import CreditCard from '@primeicons/vue/credit-card'
 import Check from '@primeicons/vue/check'
 import CartPlus from '@primeicons/vue/cart-plus'
+import Box from '@primeicons/vue/box'
+import ChartBar from '@primeicons/vue/chart-bar'
+import Pencil from '@primeicons/vue/pencil'
+import List from '@primeicons/vue/list'
+import Calendar from '@primeicons/vue/calendar'
+import TagIcon from '@primeicons/vue/tag'
 
 export {
   SignOut,
@@ -36,4 +42,10 @@ export {
   CreditCard,
   Check,
   CartPlus,
+  Box,
+  ChartBar,
+  Pencil,
+  List,
+  Calendar,
+  TagIcon,
 }

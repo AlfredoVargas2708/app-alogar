@@ -11,17 +11,18 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AdminProducts: typeof import('./src/components/AdminProducts.vue')['default']
+    AdminSales: typeof import('./src/components/AdminSales.vue')['default']
+    AdminStats: typeof import('./src/components/AdminStats.vue')['default']
     AppHeader: typeof import('./src/components/AppHeader.vue')['default']
     Button: typeof import('primevue/button')['default']
-    Card: typeof import('primevue/card')['default']
     CardModal: typeof import('./src/components/CardModal.vue')['default']
-    InputNumber: typeof import('primevue/inputnumber')['default']
     OrdenCard: typeof import('./src/components/OrdenCard.vue')['default']
     OrderSummary: typeof import('./src/components/OrderSummary.vue')['default']
     ProductCard: typeof import('./src/components/ProductCard.vue')['default']
     ProductFilters: typeof import('./src/components/ProductFilters.vue')['default']
+    ProductFormDialog: typeof import('./src/components/ProductFormDialog.vue')['default']
     ProductListing: typeof import('./src/components/ProductListing.vue')['default']
-    RadioButton: typeof import('primevue/radiobutton')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
   }

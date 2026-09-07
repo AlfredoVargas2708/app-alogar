@@ -12,10 +12,12 @@ import ProductListing from '@/components/ProductListing.vue';
 import OrderSummary from '@/components/OrderSummary.vue';
 import type { Sale } from '@/interfaces/sale.interface';
 import { useSaleStore } from '@/stores/saleStore';
+import { useUserStore } from '@/stores/userStore';
 import { useToast } from 'primevue/usetoast';
 import Toast from 'primevue/toast';
 
 const router = useRouter()
+const userStore = useUserStore();
 const productStore = useProductStore();
 const saleStore = useSaleStore();
 const { fetchProducts, categorias } = productStore;
@@ -38,9 +40,7 @@ const ofertaValue = ref<boolean>(false);
 const toast = useToast();
 
 function logout() {
-    localStorage.removeItem('username');
-    localStorage.removeItem('password');
-
+    userStore.logout();
     router.push({ path: '/login' });
 }
 

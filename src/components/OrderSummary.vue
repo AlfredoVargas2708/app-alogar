@@ -79,7 +79,7 @@ const disabledSaleButton = (): boolean => {
     }
     if (saleType.value === '') {
         return true
-    } else if (saleType.value === 'cash' && vuelto.value === 0) {
+    } else if (saleType.value === 'cash' && (totalRecibido.value ?? 0) < totalPagar.value) {
         return true
     }
 

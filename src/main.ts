@@ -4,6 +4,7 @@ import PrimeVue from 'primevue/config'
 import Aura from '@primeuix/themes/aura'
 import 'primeflex/primeflex.css'
 import ToastService from 'primevue/toastservice'
+import ConfirmationService from 'primevue/confirmationservice'
 
 import App from './App.vue'
 import router from './router'
@@ -20,6 +21,7 @@ app.use(PrimeVue, {
 app.use(createPinia())
 app.use(router)
 app.use(ToastService)
+app.use(ConfirmationService)
 app.config.globalProperties.$filters = {
   currency(value: number) {
     const format = new Intl.NumberFormat('es-CL', {

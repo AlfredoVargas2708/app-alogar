@@ -26,3 +26,13 @@ export interface AvailableFilterOption {
   label: string
   value: boolean | null
 }
+
+export interface ProductPayload {
+  title: string
+  price: number | null
+  offer_price?: number | null
+  available: boolean
+  imageUrl?: string | null
+  productType?: string | null
+  grams?: number | null
+}
