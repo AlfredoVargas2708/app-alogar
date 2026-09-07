@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import axios from 'axios';
 import { debounce } from 'lodash-es';
@@ -16,7 +16,7 @@ import { useConfirm } from 'primevue/useconfirm';
 import type { PageState } from 'primevue/paginator';
 import { useProductStore } from '@/stores/productStore';
 import { formatCurrency } from '@/shared/currency';
-import { Pencil, Plus, Search, Trash } from '@/shared/icons';
+import { Pencil, Plus, Search, Trash, Times } from '@/shared/icons';
 import type { Product, ProductPayload } from '@/interfaces/products.interface';
 import ProductFormDialog from './ProductFormDialog.vue';
 
@@ -30,10 +30,15 @@ const confirm = useConfirm();
 const first = ref(0);
 const rows = ref(10);
 const busqueda = ref<string>('');
+const sortField = ref<string | null>(null);
+const sortOrder = ref<1 | -1 | 0>(0);
 const dialogVisible = ref(false);
 const editingProduct = ref<Product | null>(null);
 const saving = ref(false);
 const togglingId = ref<number | null>(null);
+
+// Indica si hay un orden distinto al inicial activo
+const hasActiveSort = computed(() => sortField.value !== null && sortOrder.value !== 0);
 
 function apiError(err: unknown, fallback: string): string {
     return axios.isAxiosError<{ message?: string }>(err)
@@ -42,13 +47,39 @@ function apiError(err: unknown, fallback: string): string {
 }
 
 function loadProducts(page: number) {
-    void fetchAdminProducts(page, rows.value, busqueda.value || null);
+    void fetchAdminProducts(
+        page,
+        rows.value,
+        busqueda.value || null,
+        sortField.value,
+        sortOrder.value === 1 ? 'ASC' : sortOrder.value === -1 ? 'DESC' : null,
+    );
 }
 
 function onPage(event: PageState) {
     first.value = event.first;
     rows.value = event.rows;
     loadProducts(event.page + 1);
+}
+
+// En modo lazy el DataTable no ordena por sí mismo:
+// se captura el evento y se vuelve a pedir la página 1 ordenada al backend.
+// El tercer clic (sortOrder = 0) vuelve al estado inicial.
+function onSort(event: { sortField?: unknown; sortOrder?: 1 | -1 | 0 | null }) {
+    const newSortOrder = event.sortOrder === 1 || event.sortOrder === -1 ? event.sortOrder : 0;
+    // Si el orden se neutraliza, también se limpia la columna para volver al orden por id
+    sortField.value = newSortOrder === 0 ? null : (typeof event.sortField === 'string' ? event.sortField : null);
+    sortOrder.value = newSortOrder;
+    first.value = 0;
+    loadProducts(1);
+}
+
+// Restablece explícitamente el orden inicial (id ascendente)
+function resetSort() {
+    sortField.value = null;
+    sortOrder.value = 0;
+    first.value = 0;
+    loadProducts(1);
 }
 
 const onSearch = debounce(() => {
@@ -127,6 +158,7 @@ onMounted(() => {
     <div class="admin-products">
         <DataTable :value="adminProducts" :loading="adminLoading" data-key="id" lazy paginator :first="first"
             :rows="rows" :total-records="adminTotal" :rows-per-page-options="[10, 20, 50]" @page="onPage"
+            :sort-field="sortField ?? undefined" :sort-order="sortOrder" @sort="onSort"
             current-page-report-template="Mostrando {first} a {last} de {totalRecords} productos"
             paginator-template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink RowsPerPageDropdown"
             class="products-table">
@@ -138,10 +170,16 @@ onMounted(() => {
                         </InputIcon>
                         <InputText v-model="busqueda" placeholder="Buscar producto..." @update:model-value="onSearch" />
                     </IconField>
-                    <Button class="new-button" @click="openCreate">
-                        <Plus :size="18" />
-                        Nuevo Producto
-                    </Button>
+                    <div class="header-actions">
+                        <Button v-if="hasActiveSort" class="reset-sort-button" @click="resetSort">
+                            <Times :size="16" />
+                            Restablecer orden
+                        </Button>
+                        <Button class="new-button" @click="openCreate">
+                            <Plus :size="18" />
+                            Nuevo Producto
+                        </Button>
+                    </div>
                 </div>
             </template>
             <template #empty>
@@ -228,10 +266,27 @@ onMounted(() => {
     gap: 15px;
 }
 
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
 .new-button {
     background-color: var(--color-principal);
     border: none;
     white-space: nowrap;
+}
+
+.reset-sort-button {
+    background-color: transparent;
+    border: 1px solid var(--color-principal);
+    color: var(--color-principal);
+    white-space: nowrap;
+
+    &:hover {
+        background-color: color-mix(in srgb, var(--color-principal) 10%, white);
+    }
 }
 
 .row-image {

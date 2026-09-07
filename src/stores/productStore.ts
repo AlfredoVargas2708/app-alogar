@@ -109,7 +109,13 @@ export const useProductStore = defineStore('products', () => {
 
   // --- Funciones del panel de administración ---
 
-  async function fetchAdminProducts(page: number, limit: number, nombre?: string | null) {
+  async function fetchAdminProducts(
+    page: number,
+    limit: number,
+    nombre?: string | null,
+    ordenarPor?: string | null,
+    orden?: 'ASC' | 'DESC' | null,
+  ) {
     adminLoading.value = true
     error.value = null
     try {
@@ -118,6 +124,8 @@ export const useProductStore = defineStore('products', () => {
           pagina: page,
           limite: limit,
           ...(nombre ? { busqueda: encodeURIComponent(nombre) } : {}),
+          ...(ordenarPor ? { ordenarPor } : {}),
+          ...(orden ? { orden } : {}),
         },
       })
       adminProducts.value = response.data.productos

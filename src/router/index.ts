@@ -52,8 +52,10 @@ router.beforeEach((to) => {
     return { path: '/login' }
   }
 
-  if (userRole !== requiredRole) {
-    return { path: userRole === 'admin' ? '/admin' : '/home', state: { role: userRole } }
+  // Solo la vista de administración exige rol admin;
+  // un admin también puede acceder al punto de venta (/home)
+  if (requiredRole === 'admin' && userRole !== 'admin') {
+    return { path: '/home' }
   }
 
   return true
